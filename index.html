@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Cleansweep : Ruby Utility for purging data in mysql">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cleansweep</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/bkayser/cleansweep">View on GitHub</a>
+
+          <h1 id="project_title">Cleansweep</h1>
+          <h2 id="project_tagline">Ruby Utility for purging data in mysql</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/bkayser/cleansweep/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/bkayser/cleansweep/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Cleansweep</p>
+
+<p>Utilities for doing purges in an efficient, low-impact manner on 
+mysql innodb tables.  Loosely based on the Percona pt-archive utility.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-k">gem</span> <span class="pl-s1"><span class="pl-pds">'</span>cleansweep<span class="pl-pds">'</span></span></pre></div>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install cleansweep
+</code></pre>
+
+<h2>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h2>
+
+<p>Consider the table:</p>
+
+<div class="highlight highlight-sql"><pre>    <span class="pl-k">create</span> <span class="pl-k">table</span> <span class="pl-en">comments</span> (
+       <span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span> <span class="pl-st">int</span>(<span class="pl-c1">11</span>) <span class="pl-s">primary key</span> auto_increment,
+       <span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> datetime,
+       <span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-st">int</span>(<span class="pl-c1">11</span>),
+       <span class="pl-s1"><span class="pl-pds">`</span>liked<span class="pl-pds">`</span></span> <span class="pl-st">boolean</span>,
+       key comments_on_account_timestamp(account, <span class="pl-st">timestamp</span>)
+    )</pre></div>
+
+<p>Assume there is an active record model for it:</p>
+
+<pre><code>class Comment &lt; ActiveRecord::Base ; end
+</code></pre>
+
+<h3>
+<a id="purging-by-traversing-an-index" class="anchor" href="#purging-by-traversing-an-index" aria-hidden="true"><span class="octicon octicon-link"></span></a>Purging by traversing an index</h3>
+
+<p>The most efficient way to work through a table is by scanning through an index one chunk
+at a time.</p>
+
+<p>Let's assume we want to purge Comments older than 1 month.  We can
+scan the primary key index or the <code>account</code>,<code>timestamp</code> index.  In this case the latter will
+probably work better since we are evaluating the timestamp for the purge.</p>
+
+<div class="highlight highlight-ruby"><pre>    r <span class="pl-k">=</span> <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span> <span class="pl-c1">model:</span> <span class="pl-vo">Comment</span>,
+                                    <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>comments_on_account_timestamp<span class="pl-pds">'</span></span> <span class="pl-k">do </span>| <span class="pl-vo">scope</span> |
+        scope.where(<span class="pl-s1"><span class="pl-pds">'</span>timestamp &lt; ?<span class="pl-pds">'</span></span>, <span class="pl-c1">1</span>.month.ago)
+    <span class="pl-k">end</span></pre></div>
+
+<p>To execute the purge, do:</p>
+
+<div class="highlight highlight-ruby"><pre>    count <span class="pl-k">=</span> r.execute_in_batches
+    puts <span class="pl-s1"><span class="pl-pds">"</span>Deleted <span class="pl-pse">#{</span><span class="pl-s2">count</span><span class="pl-pse"><span class="pl-s2">}</span></span> rows<span class="pl-pds">"</span></span></pre></div>
+
+<p>Check what it will do:</p>
+
+<div class="highlight highlight-ruby"><pre>    r.print_queries(<span class="pl-vo">$stdout</span>)</pre></div>
+
+<p>This will show you what it will do by printing out the three different statements used:</p>
+
+<div class="highlight highlight-sql"><pre>    Initial Query:
+        <span class="pl-k">SELECT</span>  <span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span>
+        <span class="pl-k">FROM</span> <span class="pl-s1"><span class="pl-pds">`</span>comments<span class="pl-pds">`</span></span> FORCE INDEX(comments_on_account_timestamp)
+        <span class="pl-k">WHERE</span> (<span class="pl-st">timestamp</span> <span class="pl-k">&lt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-25 21:47:43<span class="pl-pds">'</span></span>)
+        <span class="pl-k">ORDER BY</span> <span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>
+        <span class="pl-k">LIMIT</span> <span class="pl-c1">500</span>
+    Chunk Query:
+        <span class="pl-k">SELECT</span>  <span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span>
+        <span class="pl-k">FROM</span> <span class="pl-s1"><span class="pl-pds">`</span>comments<span class="pl-pds">`</span></span> FORCE INDEX(comments_on_account_timestamp)
+        <span class="pl-k">WHERE</span> (<span class="pl-st">timestamp</span> <span class="pl-k">&lt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-25 21:47:43<span class="pl-pds">'</span></span>) <span class="pl-k">AND</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-c1">0</span> <span class="pl-k">OR</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">=</span> <span class="pl-c1">0</span> <span class="pl-k">AND</span> <span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-18 21:47:43<span class="pl-pds">'</span></span>))\n    <span class="pl-k">ORDER BY</span> <span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>
+        <span class="pl-k">LIMIT</span> <span class="pl-c1">500</span>
+    <span class="pl-k">Delete</span> Statement:
+        <span class="pl-k">DELETE</span>
+        <span class="pl-k">FROM</span> <span class="pl-s1"><span class="pl-pds">`</span>comments<span class="pl-pds">`</span></span>
+        <span class="pl-k">WHERE</span> (<span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span> <span class="pl-k">=</span> <span class="pl-c1">2</span>)</pre></div>
+
+<p>It does the initial statement once to get the first chunk of rows.  Then it does subsequent queries
+starting at the index where the last chunk left off, thereby avoiding a complete index scan.  This works
+fine as long as you don't have rows with duplicate account id and timestamps.  If you do, you'll possibly
+miss rows between chunks.</p>
+
+<p>To avoid missing duplicates, you can traverse the index using only the first column with an inclusive comparator
+like <code>&gt;=</code> instead of <code>&gt;</code>.  Here's what that would look like:</p>
+
+<div class="highlight highlight-ruby"><pre>    r <span class="pl-k">=</span> <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span> <span class="pl-c1">model:</span><span class="pl-vo">Comment</span>,
+                                    <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>comments_on_account_timestamp<span class="pl-pds">'</span></span>,
+                                    <span class="pl-c1">first_only:</span> <span class="pl-c1">true</span> <span class="pl-k">do </span>| <span class="pl-vo">scope</span> |
+        scope.where(<span class="pl-s1"><span class="pl-pds">'</span>timestamp &lt; ?<span class="pl-pds">'</span></span>, <span class="pl-c1">1</span>.month.ago)
+    <span class="pl-k">end</span></pre></div>
+
+<p>The chunk query looks like:</p>
+
+<div class="highlight highlight-sql"><pre>    <span class="pl-k">SELECT</span>  <span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span>
+    <span class="pl-k">FROM</span> <span class="pl-s1"><span class="pl-pds">`</span>comments<span class="pl-pds">`</span></span> FORCE INDEX(comments_on_account_timestamp)
+    <span class="pl-k">WHERE</span> (<span class="pl-st">timestamp</span> <span class="pl-k">&lt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-25 21:47:43<span class="pl-pds">'</span></span>) <span class="pl-k">AND</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">&gt;=</span> <span class="pl-c1">0</span>)
+    <span class="pl-k">LIMIT</span> <span class="pl-c1">500</span></pre></div>
+
+<p>You can scan the index in either direction.  To specify descending order, use the <code>reverse: true</code> option.</p>
+
+<h3>
+<a id="copying-rows-from-one-table-to-another" class="anchor" href="#copying-rows-from-one-table-to-another" aria-hidden="true"><span class="octicon octicon-link"></span></a>Copying rows from one table to another</h3>
+
+<p>You can use the same technique to copy rows from one table to another.  Support in CleanSweep is pretty
+minimal.  It won't <em>move</em> rows, only copy them, although it would be easy to fix this.
+I used this to copy ids into a temporary table which I then
+used to delete later.</p>
+
+<p>Here's an example that copies rows from the <code>Comment</code> model to the <code>ExpiredComment</code> model (<code>expired_comments</code>).
+Comments older than one week are copied.</p>
+
+<div class="highlight highlight-ruby"><pre>      copier <span class="pl-k">=</span> <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span> <span class="pl-c1">model:</span> <span class="pl-vo">Comment</span>,
+                                           <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>comments_on_account_timestamp<span class="pl-pds">'</span></span>,
+                                           <span class="pl-c1">dest_model:</span> <span class="pl-vo">ExpiredComment</span>,
+                                           <span class="pl-c1">copy_columns:</span> <span class="pl-s1"><span class="pl-pds">%w[</span>liked<span class="pl-pds">]</span></span> <span class="pl-k">do do </span>| <span class="pl-vo">model</span> |
+        model.where(<span class="pl-s1"><span class="pl-pds">'</span>last_used_at &lt; ?<span class="pl-pds">'</span></span>, <span class="pl-c1">1</span>.week.ago)
+      <span class="pl-k">end</span></pre></div>
+
+<p>The <code>copy_columns</code> option specifies additional columns to be inserted into the <code>expired_comments</code> table.</p>
+
+<h3>
+<a id="watching-the-history-list-and-replication-lag" class="anchor" href="#watching-the-history-list-and-replication-lag" aria-hidden="true"><span class="octicon octicon-link"></span></a>Watching the history list and replication lag</h3>
+
+<p>You can enter thresholds for the history list size and replication lag that will be used to pause the
+purge if either of those values get into an unsafe territory.  The script will pause for 5 minutes and
+only start once the corresponding metric goes back down to 90% of the specified threshold.</p>
+
+<h3>
+<a id="logging-and-monitoring-progress" class="anchor" href="#logging-and-monitoring-progress" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging and monitoring progress</h3>
+
+<p>You pass in a standard log instance to capture all running output.  By default it will log to your
+<code>ActiveRecord::Base</code> logger, or stdout if that's not set up.</p>
+
+<p>If you specify a reporting interval
+with the <code>report</code> option it will print the status of the purge at that interval.  This is useful to track
+progress and assess the rate of deletion.</p>
+
+<h3>
+<a id="joins-and-subqueries" class="anchor" href="#joins-and-subqueries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Joins and subqueries</h3>
+
+<p>You can add subqueries and joins to your query in the scope block, but be careful.  The index and order
+clause may work against you if the table you are joining with doesn't have good parity with the indexes
+in your target table.</p>
+
+<h3>
+<a id="limitations" class="anchor" href="#limitations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Limitations</h3>
+
+<ul>
+<li>Only works for mysql (as far as I know).  I have only used it against 5.5.</li>
+<li>Should work with ActiveRecord 3.* - 4.*.</li>
+<li>Using a non-unique index risks missing duplicate rows unless you use the <code>first_only</code> option.</li>
+<li>Using the <code>first_only</code> option risks rescanning many rows if you have many more duplicates than your
+chunk size</li>
+<li>An index is required but you should be able to run a purge without one.  It just means you're not
+scanning the index in chunks.  This might be okay if you are deleting everything as you go along because
+then you're not rescanning the rows.  It wouldn't require much to modify CleanSweep to support this
+mode.</li>
+</ul>
+
+<h3>
+<a id="other-options" class="anchor" href="#other-options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other options</h3>
+
+<p>There are a number of other options you can use to tune the script.  For details look at the
+<a href="blob/master/lib/clean_sweep/purge_runner.rb">API on the <code>PurgeRunner</code> class</a></p>
+
+<h3>
+<a id="newrelic-integration" class="anchor" href="#newrelic-integration" aria-hidden="true"><span class="octicon octicon-link"></span></a>NewRelic integration</h3>
+
+<p>The script requires the <a href="http://github.com/newrelic/rpm">New Relic</a> gem.  It won't impact anyting if you
+don't have a New Relic account to report to, but if you do use New Relic it is configured to show you
+detailed metrics.  I recommend turning off transaction traces for long purge jobs to reduce your memory
+footprint.</p>
+
+<h2>
+<a id="testing" class="anchor" href="#testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Testing</h2>
+
+<p>To run the specs, start a local mysql instance.  The default user is root with an empty password.
+Override the user/password with environment variables <code>DB_USER</code> and <code>DB_PASSWORD</code>.  The test
+creates a db called 'cstest'.</p>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<ol>
+<li>Fork it ( <a href="https://github.com/bkayser/cleansweep/fork">https://github.com/bkayser/cleansweep/fork</a> )</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create a new Pull Request</li>
+</ol>
+
+<h2>
+<a id="license-and-copyright" class="anchor" href="#license-and-copyright" aria-hidden="true"><span class="octicon octicon-link"></span></a>License and Copyright</h2>
+
+<p>Copyright 2014 New Relic, Inc., and Bill Kayser</p>
+
+<p>Covered by the MIT <a href="LICENSE.txt">LICENSE</a>.</p>
+
+<h3>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h3>
+
+<p>This was all inspired and informed by <a href="http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html">Percona's <code>pt-archiver</code> script</a>
+written by Baron Schwartz.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cleansweep maintained by <a href="https://github.com/bkayser">bkayser</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
