@@ -20,6 +20,11 @@
 #    Traverse the index in reverse order.  For example, if your index is on <tt>account_id</tt>,
 #    <tt>timestamp</tt>, this option will move through the rows starting at the highest account
 #    number, then move through timestamps starting with the most recent.
+# [:first_only]
+#    Traverse only the first column of the index, and do so inclusively using the <tt>&gt;=</tt> operator
+#    instead of the strict <tt>&gt;</tt> operator.  This is important if the index is not unique and there
+#    are a lot of duplicates.  Otherwise the delete could miss rows.  Not allowed in copy mode because you'd
+#    be inserting duplicate rows.
 # [:dry_run]
 #    Goes through the work of finding the rows but does not execute a delete or insert.
 # [:stop_after]
@@ -77,21 +82,24 @@ class CleanSweep::PurgeRunner
     @table_schema     = CleanSweep::TableSchema.new @model,
                                                     key_name: options[:index],
                                                     ascending: !options[:reverse],
-                                                    extra_columns: options[:copy_columns]
+                                                    extra_columns: options[:copy_columns],
+                                                    first_only: options[:first_only]
 
     if (@max_history || @max_repl_lag)
       @mysql_status = CleanSweep::PurgeRunner::MysqlStatus.new model: @model,
                                                                max_history: @max_history,
                                                                max_repl_lag: @max_repl_lag,
                                                                check_period: options[:check_period],
-	                                                       logger: @logger
+	                                                             logger: @logger
     end
 
     raise "You can't copy rows from a table into itself" if copy_mode? && @model == @target_model
+    raise "An index is required in copy mode" if copy_mode? && @table_schema.traversing_key.nil?
+    raise "first_only option not allowed in copy mode" if copy_mode? && @table_schema.first_only?
 
     @report_interval_start = Time.now
 
-    @query            = @table_schema.initial_scope.limit(@limit)
+    @query                 = @table_schema.initial_scope.limit(@limit)
 
     @query = yield(@query) if block_given?
   end

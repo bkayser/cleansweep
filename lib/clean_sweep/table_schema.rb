@@ -16,6 +16,7 @@ class CleanSweep::TableSchema
 
     traversing_key_name  = options[:key_name]
     ascending            = options.include?(:ascending) ? options[:ascending] : true
+    first_only           = options[:first_only]
     @model               = model
     @name                = @model.table_name
     @select_columns      = (options[:extra_columns] && options[:extra_columns].map(&:to_sym)) || []
@@ -34,7 +35,9 @@ class CleanSweep::TableSchema
       @traversing_key = key_schemas[traversing_key_name]
       @traversing_key.add_columns_to @select_columns
       @traversing_key.ascending = ascending
+      @traversing_key.first_only = first_only
     end
+
   end
 
   def insert_statement(target_model, rows)
@@ -54,17 +57,20 @@ class CleanSweep::TableSchema
 
   def initial_scope
     scope = @model.all.select(quoted_column_names).from(from_clause)
-    scope = scope.order(order_clause) if @traversing_key
+    scope = @traversing_key.order(scope) if @traversing_key
     return scope
   end
 
   def scope_to_next_chunk scope, last_row
-    return scope if @traversing_key.blank?
-    query_args = {}
-    @traversing_key.columns.each do |column|
-      query_args[column.name] = column.value(last_row)
+    if @traversing_key.blank?
+      scope
+    else
+      @traversing_key.scope_to_next_chunk(scope, last_row)
     end
-    scope.where(chunk_clause, query_args)
+  end
+
+  def first_only?
+    @traversing_key && @traversing_key.first_only
   end
 
   private
@@ -75,14 +81,9 @@ class CleanSweep::TableSchema
     return table_name
   end
 
-  def order_clause
-    @traversing_key.columns.map { |col| "#{col.quoted_name} #{@traversing_key.ascending ? 'ASC' : 'DESC'}"}.join(",")
-  end
-
   def quoted_column_names
     select_columns.map{|c| "`#{c}`"}.join(",")
   end
-
 
   def quoted_row_values(rows)
     rows.map do |vec|
@@ -92,21 +93,6 @@ class CleanSweep::TableSchema
       "(#{quoted_column_values})"
     end.join(",")
   end
-
-  def chunk_clause
-    return if @traversing_key.nil?
-    @chunk_clause ||= add_term(@traversing_key.columns.dup, @traversing_key.ascending)
-  end
-
-  def add_term(columns, ascending)
-    column = columns.shift
-    clause = "#{column.quoted_name} #{ascending ? ">" : "<"} :#{column.name}"
-    if columns.any?
-      clause << " OR (#{column.quoted_name} = :#{column.name} AND #{add_term columns, ascending})"
-    end
-    return clause
-  end
-
 
   def build_indexes
     indexes = {}
@@ -122,52 +108,5 @@ class CleanSweep::TableSchema
     return indexes
   end
 
-  class ColumnSchema
-
-    attr_reader :name
-    attr_accessor :select_position
-
-    def initialize(name, model)
-      @name = name.to_sym
-      col_num = model.column_names.index(name.to_s) or raise "Can't find #{name} in #{model.name}"
-      @model = model
-      @column = model.columns[col_num]
-    end
-
-    def quoted_name
-      "`#{name}`"
-    end
-    def value(row)
-      row[select_position]
-    end
-    def quoted_value(row)
-      @model.quote_value(value(row), @column)
-    end
-  end
-
-  class IndexSchema < Struct.new :name, :model, :ascending
-
-    attr_reader :columns
-
-    def initialize *args
-      super
-      @columns = []
-    end
-
-    def << col_name
-      @columns << ColumnSchema.new(col_name, model)
-    end
-
-    def add_columns_to select_columns
-      @columns.each do | column |
-        pos = select_columns.index column.name
-        if pos.nil?
-          select_columns << column.name
-          pos = select_columns.size - 1
-        end
-        column.select_position = pos
-      end
-    end
-  end
 end
 
