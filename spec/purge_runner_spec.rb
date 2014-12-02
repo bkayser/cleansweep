@@ -77,13 +77,15 @@ Initial Query:
     WHERE (timestamp < '2014-11-25 21:47:43')
     ORDER BY `account` ASC,`timestamp` ASC
     LIMIT 500
-Subsequent Query:
+Chunk Query:
     SELECT  `id`,`account`,`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC\n    LIMIT 500
+    WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC
+    LIMIT 500
 Delete Statement:
     DELETE
-    FROM `comments`\n    WHERE (`id` = 2)
+    FROM `comments`
+    WHERE (`id` = 2)
 EOF
         end
       end

@@ -190,7 +190,7 @@ class CleanSweep::PurgeRunner
     io.puts 'Initial Query:'
     io.puts format_query('    ', @query.to_sql)
     rows = @model.connection.select_rows @query.limit(1).to_sql
-    io.puts "Subsequent Query:"
+    io.puts "Chunk Query:"
     io.puts format_query('    ', @table_schema.scope_to_next_chunk(@query, rows.first).to_sql)
     if copy_mode?
       io.puts "Insert Statement:"
