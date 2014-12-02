@@ -1,0 +1,874 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>
+  Class: CleanSweep::TableSchema
+  
+    &mdash; Documentation by YARD 0.8.7.6
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '../';
+  framesUrl = "../frames.html#!CleanSweep/TableSchema.html";
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="../_index.html">Index (T)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../CleanSweep.html" title="CleanSweep (module)">CleanSweep</a></span></span>
+     &raquo; 
+    <span class="title">TableSchema</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="../method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="../file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><h1>Class: CleanSweep::TableSchema
+  
+  
+  
+</h1>
+
+<dl class="box">
+  
+    <dt class="r1">Inherits:</dt>
+    <dd class="r1">
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">CleanSweep::TableSchema</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+      </dd>
+    
+  
+  
+    
+  
+    
+  
+  
+  
+    <dt class="r2 last">Defined in:</dt>
+    <dd class="r2 last">lib/clean_sweep/table_schema.rb</dd>
+  
+</dl>
+<div class="clear"></div>
+
+<h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="TableSchema/ColumnSchema.html" title="CleanSweep::TableSchema::ColumnSchema (class)">ColumnSchema</a></span>, <span class='object_link'><a href="TableSchema/IndexSchema.html" title="CleanSweep::TableSchema::IndexSchema (class)">IndexSchema</a></span>
+    
+  
+</p>
+
+
+
+
+  <h2>Instance Attribute Summary <small>(<a href="#" class="summary_toggle">collapse</a>)</small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#name-instance_method" title="#name (instance method)">- (Object) <strong>name</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Returns the value of attribute name.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#primary_key-instance_method" title="#primary_key (instance method)">- (Object) <strong>primary_key</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>The schema for the primary key.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#select_columns-instance_method" title="#select_columns (instance method)">- (Object) <strong>select_columns</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>The list of columns used when selecting, the union of pk and traversing key
+columns.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#traversing_key-instance_method" title="#traversing_key (instance method)">- (Object) <strong>traversing_key</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>The schema for the traversing key, or nil.</p>
+</div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#delete_statement-instance_method" title="#delete_statement (instance method)">- (Object) <strong>delete_statement</strong>(rows) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#first_only%3F-instance_method" title="#first_only? (instance method)">- (Boolean) <strong>first_only?</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initial_scope-instance_method" title="#initial_scope (instance method)">- (Object) <strong>initial_scope</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (TableSchema) <strong>initialize</strong>(model, options = {}) </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>A new instance of TableSchema.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#insert_statement-instance_method" title="#insert_statement (instance method)">- (Object) <strong>insert_statement</strong>(target_model, rows) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#scope_to_next_chunk-instance_method" title="#scope_to_next_chunk (instance method)">- (Object) <strong>scope_to_next_chunk</strong>(scope, last_row) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    - (<tt><span class='object_link'><a href="" title="CleanSweep::TableSchema (class)">TableSchema</a></span></tt>) <strong>initialize</strong>(model, options = {}) 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns a new instance of TableSchema</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 15</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='op'>=</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span>  <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:key_name</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_ascending'>ascending</span>            <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='symbol'>:ascending</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:ascending</span><span class='rbracket'>]</span> <span class='op'>:</span> <span class='kw'>true</span>
+  <span class='id identifier rubyid_first_only'>first_only</span>           <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:first_only</span><span class='rbracket'>]</span>
+  <span class='ivar'>@model</span>               <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span>
+  <span class='ivar'>@name</span>                <span class='op'>=</span> <span class='ivar'>@model</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span>
+  <span class='ivar'>@select_columns</span>      <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:extra_columns</span><span class='rbracket'>]</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:extra_columns</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='symbol'>:to_sym</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+
+  <span class='id identifier rubyid_key_schemas'>key_schemas</span> <span class='op'>=</span> <span class='id identifier rubyid_build_indexes'>build_indexes</span>
+
+  <span class='comment'># Primary key only supported, but we could probably get around this by adding
+</span>  <span class='comment'># all columns as &#39;primary key columns&#39;
+</span>  <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Table </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_table_name'>table_name</span><span class='embexpr_end'>}</span><span class='tstring_content'> must have a primary key</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_key_schemas'>key_schemas</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>primary</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='ivar'>@primary_key</span> <span class='op'>=</span> <span class='id identifier rubyid_key_schemas'>key_schemas</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>primary</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+  <span class='ivar'>@primary_key</span><span class='period'>.</span><span class='id identifier rubyid_add_columns_to'>add_columns_to</span> <span class='ivar'>@select_columns</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span>
+    <span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span><span class='period'>.</span><span class='id identifier rubyid_downcase!'>downcase!</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>BTREE Index </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span><span class='embexpr_end'>}</span><span class='tstring_content'> not found</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>unless</span> <span class='id identifier rubyid_key_schemas'>key_schemas</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span>
+    <span class='ivar'>@traversing_key</span> <span class='op'>=</span> <span class='id identifier rubyid_key_schemas'>key_schemas</span><span class='lbracket'>[</span><span class='id identifier rubyid_traversing_key_name'>traversing_key_name</span><span class='rbracket'>]</span>
+    <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_add_columns_to'>add_columns_to</span> <span class='ivar'>@select_columns</span>
+    <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_ascending'>ascending</span> <span class='op'>=</span> <span class='id identifier rubyid_ascending'>ascending</span>
+    <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_first_only'>first_only</span> <span class='op'>=</span> <span class='id identifier rubyid_first_only'>first_only</span>
+  <span class='kw'>end</span>
+
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="name-instance_method">
+  
+    - (<tt>Object</tt>) <strong>name</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns the value of attribute name</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+13
+14
+15</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 13</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_name'>name</span>
+  <span class='ivar'>@name</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="primary_key-instance_method">
+  
+    - (<tt>Object</tt>) <strong>primary_key</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>The schema for the primary key</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+8
+9
+10</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 8</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_primary_key'>primary_key</span>
+  <span class='ivar'>@primary_key</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="select_columns-instance_method">
+  
+    - (<tt>Object</tt>) <strong>select_columns</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>The list of columns used when selecting, the union of pk and traversing key
+columns</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+5
+6
+7</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 5</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_select_columns'>select_columns</span>
+  <span class='ivar'>@select_columns</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="traversing_key-instance_method">
+  
+    - (<tt>Object</tt>) <strong>traversing_key</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>The schema for the traversing key, or nil</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+11
+12
+13</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 11</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_traversing_key'>traversing_key</span>
+  <span class='ivar'>@traversing_key</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="delete_statement-instance_method">
+  
+    - (<tt>Object</tt>) <strong>delete_statement</strong>(rows) 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 47</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_delete_statement'>delete_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_rec_criteria'>rec_criteria</span> <span class='op'>=</span> <span class='id identifier rubyid_rows'>rows</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='kw'>do</span> <span class='op'>|</span> <span class='id identifier rubyid_row'>row</span> <span class='op'>|</span>
+    <span class='id identifier rubyid_row_compares'>row_compares</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+    <span class='ivar'>@primary_key</span><span class='period'>.</span><span class='id identifier rubyid_columns'>columns</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_column'>column</span><span class='op'>|</span>
+      <span class='id identifier rubyid_row_compares'>row_compares</span> <span class='op'>&lt;&lt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_column'>column</span><span class='period'>.</span><span class='id identifier rubyid_quoted_name'>quoted_name</span><span class='embexpr_end'>}</span><span class='tstring_content'> = </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_column'>column</span><span class='period'>.</span><span class='id identifier rubyid_quoted_value'>quoted_value</span><span class='lparen'>(</span><span class='id identifier rubyid_row'>row</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+    <span class='kw'>end</span>
+    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>(</span><span class='tstring_end'>&quot;</span></span> <span class='op'>+</span> <span class='id identifier rubyid_row_compares'>row_compares</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> AND </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='op'>+</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>)</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+  <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>DELETE FROM </span><span class='embexpr_beg'>#{</span><span class='ivar'>@model</span><span class='period'>.</span><span class='id identifier rubyid_quoted_table_name'>quoted_table_name</span><span class='embexpr_end'>}</span><span class='tstring_content'> WHERE </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_rec_criteria'>rec_criteria</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> OR </span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="first_only?-instance_method">
+  
+    - (<tt>Boolean</tt>) <strong>first_only?</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+72
+73
+74</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 72</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_first_only?'>first_only?</span>
+  <span class='ivar'>@traversing_key</span> <span class='op'>&amp;&amp;</span> <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_first_only'>first_only</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="initial_scope-instance_method">
+  
+    - (<tt>Object</tt>) <strong>initial_scope</strong> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+58
+59
+60
+61
+62</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 58</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initial_scope'>initial_scope</span>
+  <span class='id identifier rubyid_scope'>scope</span> <span class='op'>=</span> <span class='ivar'>@model</span><span class='period'>.</span><span class='id identifier rubyid_all'>all</span><span class='period'>.</span><span class='id identifier rubyid_select'>select</span><span class='lparen'>(</span><span class='id identifier rubyid_quoted_column_names'>quoted_column_names</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_from'>from</span><span class='lparen'>(</span><span class='id identifier rubyid_from_clause'>from_clause</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_scope'>scope</span> <span class='op'>=</span> <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_order'>order</span><span class='lparen'>(</span><span class='id identifier rubyid_scope'>scope</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='ivar'>@traversing_key</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_scope'>scope</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="insert_statement-instance_method">
+  
+    - (<tt>Object</tt>) <strong>insert_statement</strong>(target_model, rows) 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+43
+44
+45</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 43</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_insert_statement'>insert_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_target_model'>target_model</span><span class='comma'>,</span> <span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>insert into </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_target_model'>target_model</span><span class='period'>.</span><span class='id identifier rubyid_quoted_table_name'>quoted_table_name</span><span class='embexpr_end'>}</span><span class='tstring_content'> (</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_quoted_column_names'>quoted_column_names</span><span class='embexpr_end'>}</span><span class='tstring_content'>) values </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_quoted_row_values'>quoted_row_values</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="scope_to_next_chunk-instance_method">
+  
+    - (<tt>Object</tt>) <strong>scope_to_next_chunk</strong>(scope, last_row) 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+64
+65
+66
+67
+68
+69
+70</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema.rb', line 64</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_scope_to_next_chunk'>scope_to_next_chunk</span> <span class='id identifier rubyid_scope'>scope</span><span class='comma'>,</span> <span class='id identifier rubyid_last_row'>last_row</span>
+  <span class='kw'>if</span> <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_blank?'>blank?</span>
+    <span class='id identifier rubyid_scope'>scope</span>
+  <span class='kw'>else</span>
+    <span class='ivar'>@traversing_key</span><span class='period'>.</span><span class='id identifier rubyid_scope_to_next_chunk'>scope_to_next_chunk</span><span class='lparen'>(</span><span class='id identifier rubyid_scope'>scope</span><span class='comma'>,</span> <span class='id identifier rubyid_last_row'>last_row</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+    <div id="footer">
+  Generated on Tue Dec  2 14:58:16 2014 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.7.6 (ruby-2.1.4).
+</div>
+
+  </body>
+</html>
