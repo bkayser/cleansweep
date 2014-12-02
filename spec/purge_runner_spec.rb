@@ -1,7 +1,16 @@
 require 'spec_helper'
 
+require 'active_support/testing/time_helpers'
 describe CleanSweep::PurgeRunner do
+
   context 'PurgeRunner' do
+    include ActiveSupport::Testing::TimeHelpers
+    before do
+      travel_to Time.parse("2014-12-02 13:47:43 -0800")
+    end
+    after do
+      travel_back
+    end
 
     context "using comments" do
       before do
@@ -10,15 +19,17 @@ describe CleanSweep::PurgeRunner do
       context "with duplicate rows" do
 
         # This testcase demonstrates a weakness in the index traversal
-        # which is that if you aren't using a unique index, you can miss rows.
+        # which is that if you aren't using a unique index or the first_only option,
+        # you can miss rows.
+        #
         # In this case we have some duplicate rows but because the chunk_size is
         # set low, we don't get all the duplicates in one chunk.  And they miss
         # the next chunk because we are looking for values greater than the
         # columns in the current chunk.
         #
-        # If we did an inclusive comparison it would fix the problem but it would also
-        # mean copying rows more than once, or getting in an infinite loop on
-        # dry_run.
+        # If you use the first_only option it means it builds the where clause using only
+        # the first column of the index, and it also uses the >=, <= operators instead
+        # of >, <.  So it picks up all the rows.
         #
 
         before do
@@ -31,13 +42,49 @@ describe CleanSweep::PurgeRunner do
 
         it "can miss some rows" do
           purger = CleanSweep::PurgeRunner.new model: Comment,
-                                               index: 'comments_on_account_timestamp',
-                                               chunk_size: 4 do | scope |
+                                               index: 'comments_on_timestamp',
+                                               chunk_size: 7 do | scope |
             scope.where('timestamp < ?', 1.week.ago)
           end
           expect( -> {
             purger.execute_in_batches
-          }).to change(Comment, :count).from(50).to(38)  # if it deleted all dups this would be 30, not 42
+          }).to change(Comment, :count).from(50).to(43)  # if it deleted all dups this would be 30, not 42
+        end
+        it "won't miss rows using first_only option" do
+          purger = CleanSweep::PurgeRunner.new model: Comment,
+                                               index: 'comments_on_timestamp',
+                                               first_only: true,
+                                               chunk_size: 7 do | scope |
+            scope.where('timestamp < ?', 1.week.ago)
+          end
+          expect( -> {
+            purger.execute_in_batches
+          }).to change(Comment, :count).from(50).to(30)  # if it deleted all dups this would be 30, not 42
+
+        end
+
+        it 'prints out the queries in a dry run' do
+          purger = CleanSweep::PurgeRunner.new model: Comment,
+                                               index: 'comments_on_account_timestamp'  do | scope |
+            scope.where('timestamp < ?', 1.week.ago)
+          end
+          output = StringIO.new
+          purger.print_queries(output)
+          expect(output.string).to eq <<EOF
+Initial Query:
+    SELECT  `id`,`account`,`timestamp`
+    FROM `comments` FORCE INDEX(comments_on_account_timestamp)
+    WHERE (timestamp < '2014-11-25 21:47:43')
+    ORDER BY `account` ASC,`timestamp` ASC
+    LIMIT 500
+Subsequent Query:
+    SELECT  `id`,`account`,`timestamp`
+    FROM `comments` FORCE INDEX(comments_on_account_timestamp)
+    WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC\n    LIMIT 500
+Delete Statement:
+    DELETE
+    FROM `comments`\n    WHERE (`id` = 2)
+EOF
         end
       end
       context "with unique rows" do

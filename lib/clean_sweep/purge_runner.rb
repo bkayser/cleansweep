@@ -1,3 +1,4 @@
+require 'stringio'
 # This is a utility built to mimic some of the features of the pt_archive script
 # to make really big purges go faster with no production impact.
 #
@@ -26,7 +27,7 @@
 #    are a lot of duplicates.  Otherwise the delete could miss rows.  Not allowed in copy mode because you'd
 #    be inserting duplicate rows.
 # [:dry_run]
-#    Goes through the work of finding the rows but does not execute a delete or insert.
+#    Print out the queries that are going to be used.  You should run explain on these.
 # [:stop_after]
 #    The operation will end after copying this many rows.
 # [:report]
@@ -53,7 +54,6 @@
 #    The maximum length of the replication lag.  Checked every 5 minutes and if exceeded the purge
 #    pauses until the replication lag is below 90% of this value.
 
-#
 class CleanSweep::PurgeRunner
 
   require 'clean_sweep/purge_runner/logging'
@@ -117,9 +117,10 @@ class CleanSweep::PurgeRunner
   #
   def execute_in_batches
 
+    print_queries($stdout) and return 0 if @dry_run
+
     @start = Time.now
     verb = copy_mode? ? "copying" : "purging"
-    verb = "NOT "+verb if @dry_run
 
     msg = "starting: #{verb} #{@table_schema.name} records in batches of #@limit"
     msg << " to #{@target_model.table_name}" if copy_mode?
@@ -150,17 +151,12 @@ class CleanSweep::PurgeRunner
         metric_op_name = 'DELETE'
         statement = @table_schema.delete_statement(rows)
       end
-      if @dry_run && !copy_mode?
-        @total_deleted += rows.size
-        log :debug, "NOT DOING: #{statement}" if @logger.level == Logger::DEBUG
-      else
-        log :debug, statement if @logger.level == Logger::DEBUG
-        chunk_deleted = NewRelic::Agent.with_database_metric_name(@target_model, metric_op_name) do
-          @model.connection.update statement
-        end
-
-        @total_deleted += chunk_deleted
+      log :debug, statement if @logger.level == Logger::DEBUG
+      chunk_deleted = NewRelic::Agent.with_database_metric_name(@target_model, metric_op_name) do
+        @model.connection.update statement
       end
+
+      @total_deleted += chunk_deleted
       raise CleanSweep::PurgeStopped.new("stopped after #{verb} #{@total_deleted} #{@model} records", @total_deleted) if stopped
       q = @table_schema.scope_to_next_chunk(@query, last_row).to_sql
       log :debug, "find rows: #{q}" if @logger.level == Logger::DEBUG
@@ -190,9 +186,26 @@ class CleanSweep::PurgeRunner
   add_method_tracer :sleep
   add_method_tracer :execute_in_batches
 
+  def print_queries(io)
+    io.puts 'Initial Query:'
+    io.puts format_query('    ', @query.to_sql)
+    rows = @model.connection.select_rows @query.limit(1).to_sql
+    io.puts "Subsequent Query:"
+    io.puts format_query('    ', @table_schema.scope_to_next_chunk(@query, rows.first).to_sql)
+    if copy_mode?
+      io.puts "Insert Statement:"
+      io.puts format_query('    ', @table_schema.insert_statement(@target_model, rows))
+    else
+      io.puts "Delete Statement:"
+      io.puts format_query('    ', @table_schema.delete_statement(rows))
+    end
+  end
+
   private
 
-
-
+  def format_query indentation, query
+    lines = query.split(/ (?=values|from|where|order|limit)/i)
+    lines.map {|line| indentation + line.strip }.join("\n")
+  end
 end
 
