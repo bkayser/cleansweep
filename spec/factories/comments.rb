@@ -8,9 +8,11 @@ class Comment < ActiveRecord::Base
        `timestamp` datetime,
        `account` int(11),
        `seen` boolean,
-       key comments_on_timestamp(account, timestamp)
+       key comments_on_account_timestamp(account, timestamp),
+       key comments_on_timestamp(timestamp desc)
     )
     EOF
+    connection.execute 'truncate table comments'
   end
 
 end

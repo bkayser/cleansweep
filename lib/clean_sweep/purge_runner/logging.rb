@@ -12,9 +12,9 @@ module CleanSweep::PurgeRunner::Logging
       rate    = "#{rate > 0 ? '%12i' % rate : ('%12s' %'< 1')} records/second"
       report << "report:"
       if copy_mode?
-        report << "  copied #{'%12i' % @total_deleted} #{@source_model.table_name} records"
+        report << "  #{@dry_run ? 'queried' : 'copied'}: #{'%12i' % @total_deleted} #{@model.table_name} records"
       else
-        report << "  #{@dry_run ? 'queried' : 'deleted'}: #{'%12i' % @total_deleted} #{@target_model.table_name} records"
+        report << "  #{@dry_run ? 'queried' : 'deleted'}: #{'%12i' % @total_deleted} #{@model.table_name} records"
       end
       report << "  elapsed: #{'%12s' % format(elapsed)}"
       report << "  rate:    #{rate}"

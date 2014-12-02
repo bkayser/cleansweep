@@ -23,3 +23,14 @@ FactoryGirl.define do
     book.sequence(:title) { |n|  "Jaws, Part #{n}"}
   end
 end
+
+class BookTemp < ActiveRecord::Base
+
+  self.table_name = 'book_vault'
+
+  def self.create_table
+    connection.execute <<-EOF
+    create temporary table if not exists book_vault like books
+    EOF
+  end
+end

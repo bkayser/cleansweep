@@ -27,6 +27,29 @@ creates a db called 'cstest'.
 
 ## Examples
 
+### Purging by a timestamp
+
+Let's assume we want to purge Comments older than 1 month that have not been liked.  The best way
+to move through the table wil be by `timestamp` so use the index on that column.  
+
+(docs still a work in progress...)
+
+### Copying rows from one table to another
+
+Copy rows from `Metric` model (`metrics` table) to `ExpiredMetric` model (`expired_metrics`).
+Metrics older than one week are copied.  Use the index on `account_id`, `metric_id`.  This only
+makes sense if there's not an index on `last_used_at` because it's going to scan all the rows.
+
+      expired_metrics_copier = CleanSweep::PurgeRunner.new \
+           limit: 1000,
+ 	   copy: true,
+           index: 'index_metrics_on_account_id_and_metric_id',
+           keys: %w[account_id metric_id],
+           target: ExpiredMetric,
+           source: Metric) do | model |
+        model.where('last_used_at < unix_timestamp(now() - INTERVAL 1 WEEK)')
+      end
+      copied_count = expired_metrics_copier.execute_in_batches
 
 
 ## Contributing
