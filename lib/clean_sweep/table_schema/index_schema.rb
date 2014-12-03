@@ -1,6 +1,6 @@
 class CleanSweep::TableSchema::IndexSchema < Struct.new :name, :model, :ascending
 
-  attr_accessor :columns, :name, :model, :ascending, :first_only
+  attr_accessor :columns, :name, :model, :ascending, :first_only, :dest_model
 
   def initialize name, model
     @model = model
@@ -16,12 +16,12 @@ class CleanSweep::TableSchema::IndexSchema < Struct.new :name, :model, :ascendin
   # Take columns referenced by this index and add them to the list if they
   # are not present.  Record their position in the list because the position will
   # be where they are located in a row of values passed in later to #scope_to_next_chunk
-  def add_columns_to select_columns
+  def add_columns_to columns
     @columns.each do | column |
-      pos = select_columns.index column.name
+      pos = columns.index column
       if pos.nil?
-        select_columns << column.name
-        pos = select_columns.size - 1
+        columns << column
+        pos = columns.size - 1
       end
       column.select_position = pos
     end

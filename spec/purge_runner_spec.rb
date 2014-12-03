@@ -72,13 +72,13 @@ describe CleanSweep::PurgeRunner do
           purger.print_queries(output)
           expect(output.string).to eq <<EOF
 Initial Query:
-    SELECT  `id`,`account`,`timestamp`
+    SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
     WHERE (timestamp < '2014-11-25 21:47:43')
     ORDER BY `account` ASC,`timestamp` ASC
     LIMIT 500
 Chunk Query:
-    SELECT  `id`,`account`,`timestamp`
+    SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
     WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC
     LIMIT 500
@@ -167,13 +167,20 @@ EOF
       it 'copies books' do
         BookTemp.create_table
         purger = CleanSweep::PurgeRunner.new model: Book,
+                                             copy_columns: ['publisher'],
                                              dest_model: BookTemp,
+                                             dest_columns: { 'PUBLISHER' => 'published_by', 'ID' => 'book_id'},
                                              chunk_size: 4,
+                                             copy_only: true,
                                              index: 'book_index_by_bin'
 
         count = purger.execute_in_batches
         expect(count).to be(@total_book_size)
         expect(BookTemp.count).to eq(@total_book_size)
+        last_book = BookTemp.last
+        expect(last_book.book_id).to be 200
+        expect(last_book.bin).to be 2000
+        expect(last_book.published_by).to eq 'Random House'
       end
 
     end

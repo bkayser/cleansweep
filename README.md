@@ -1,5 +1,6 @@
-Cleansweep is a utility for scripting purges using ruby in an efficient, low-impact manner on
-mysql innodb tables.  Based on the Percona `pt-archive` utility.
+Cleansweep is a utility for scripting purges using ruby in an
+efficient, low-impact manner on mysql innodb tables.  Based on the
+Percona `pt-archive` utility.
 
 ## Installation
 
@@ -35,12 +36,13 @@ Assume there is an active record model for it:
 
 ### Purging by traversing an index
 
-The most efficient way to work through a table is by scanning through an index one chunk
-at a time.
+The most efficient way to work through a table is by scanning through
+an index one chunk at a time.
 
 Let's assume we want to purge Comments older than 1 month.  We can
-scan the primary key index or the `account`,`timestamp` index.  In this case the latter will
-probably work better since we are evaluating the timestamp for the purge.
+scan the primary key index or the `account`,`timestamp` index.  In
+this case the latter will probably work better since we are evaluating
+the timestamp for the purge.
 
 ```ruby
     r = CleanSweep::PurgeRunner.new model: Comment,
@@ -62,7 +64,8 @@ Check what it will do:
     r.print_queries($stdout)
 ```
 
-This will show you what it will do by printing out the three different statements used:
+This will show you what it will do by printing out the three different
+statements used:
 
 ```sql
     Initial Query:
@@ -82,13 +85,15 @@ This will show you what it will do by printing out the three different statement
         WHERE (`id` = 2)
 ```
 
-It does the initial statement once to get the first chunk of rows.  Then it does subsequent queries
-starting at the index where the last chunk left off, thereby avoiding a complete index scan.  This works
-fine as long as you don't have rows with duplicate account id and timestamps.  If you do, you'll possibly
-miss rows between chunks.
+It does the initial statement once to get the first chunk of rows.
+Then it does subsequent queries starting at the index where the last
+chunk left off, thereby avoiding a complete index scan.  This works
+fine as long as you don't have rows with duplicate account id and
+timestamps.  If you do, you'll possibly miss rows between chunks.
 
-To avoid missing duplicates, you can traverse the index using only the first column with an inclusive comparator
-like `>=` instead of `>`.  Here's what that would look like:
+To avoid missing duplicates, you can traverse the index using only the
+first column with an inclusive comparator like `>=` instead of `>`.
+Here's what that would look like:
 
 ```ruby
     r = CleanSweep::PurgeRunner.new model:Comment,
@@ -107,48 +112,70 @@ The chunk query looks like:
     LIMIT 500
 ```
 
-You can scan the index in either direction.  To specify descending order, use the `reverse: true` option.
+You can scan the index in either direction.  To specify descending
+order, use the `reverse: true` option.
 
 ### Copying rows from one table to another
 
-You can use the same technique to copy rows from one table to another.  Support in CleanSweep is pretty
-minimal.  It won't _move_ rows, only copy them, although it would be easy to fix this.
-I used this to copy ids into a temporary table which I then
-used to delete later.
+You can use the same technique to copy rows from one table to another.
+Support in CleanSweep is pretty minimal.  It won't _move_ rows, only
+copy them, although it would be easy to fix this.  I used this to copy
+ids into a temporary table which I then used to delete later.
 
-Here's an example that copies rows from the `Comment` model to the `ExpiredComment` model (`expired_comments`).
-Comments older than one week are copied.
+Here's an example that copies rows from the `Comment` model to the
+`ExpiredComment` model (`expired_comments`).  Comments older than one
+week are copied.
 
 ```ruby
       copier = CleanSweep::PurgeRunner.new model: Comment,
                                            index: 'comments_on_account_timestamp',
                                            dest_model: ExpiredComment,
+                                           copy_only: true,
                                            copy_columns: %w[liked] do do | model |
         model.where('last_used_at < ?', 1.week.ago)
       end
 ```
 
-The `copy_columns` option specifies additional columns to be inserted into the `expired_comments` table.
+The `copy_columns` option specifies additional columns to be inserted
+into the `expired_comments` table.
+
+If the column names are different in the destination table than in the
+source table, you can specify a mapping with the `dest_columns` option
+which takes a map of source column name to destination name.
+
+### Deleting rows in another table
+
+What if you want to query one table and delete those rows in another?
+I needed this when I built a temporary table of account ids that
+referenced deleted accounts.  I then wanted to delete rows in other
+tables that referenced those account ids.  To do that, specify a
+`dest_table` without specifying `copy_only` mode.  This will execute
+the delete statement on the destination table without removing rows
+from the source table.
 
 ### Watching the history list and replication lag
 
-You can enter thresholds for the history list size and replication lag that will be used to pause the
-purge if either of those values get into an unsafe territory.  The script will pause for 5 minutes and
-only start once the corresponding metric goes back down to 90% of the specified threshold.
+You can enter thresholds for the history list size and replication lag
+that will be used to pause the purge if either of those values get
+into an unsafe territory.  The script will pause for 5 minutes and
+only start once the corresponding metric goes back down to 90% of the
+specified threshold.
 
 ### Logging and monitoring progress
 
-You pass in a standard log instance to capture all running output.  By default it will log to your
-`ActiveRecord::Base` logger, or stdout if that's not set up.
+You pass in a standard log instance to capture all running output.  By
+default it will log to your `ActiveRecord::Base` logger, or stdout if
+that's not set up.
 
-If you specify a reporting interval
-with the `report` option it will print the status of the purge at that interval.  This is useful to track
-progress and assess the rate of deletion.
+If you specify a reporting interval with the `report` option it will
+print the status of the purge at that interval.  This is useful to
+track progress and assess the rate of deletion.
 
 ### Joins and subqueries
 
-You can add subqueries and joins to your query in the scope block, but be careful.  The index and order
-clause may work against you if the table you are joining with doesn't have good parity with the indexes
+You can add subqueries and joins to your query in the scope block, but
+be careful.  The index and order clause may work against you if the
+table you are joining with doesn't have good parity with the indexes
 in your target table.
 
 ### Limitations
@@ -165,21 +192,24 @@ in your target table.
 
 ### Other options
 
-There are a number of other options you can use to tune the script.  For details look at the
-[API on the `PurgeRunner` class](http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html)
+There are a number of other options you can use to tune the script.
+For details look at the [API on the `PurgeRunner`
+class](http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html)
 
 ### NewRelic integration
 
-The script requires the [New Relic](http://github.com/newrelic/rpm) gem.  It won't impact anyting if you
-don't have a New Relic account to report to, but if you do use New Relic it is configured to show you
-detailed metrics.  I recommend turning off transaction traces for long purge jobs to reduce your memory
-footprint.
+The script requires the [New Relic](http://github.com/newrelic/rpm)
+gem.  It won't impact anyting if you don't have a New Relic account to
+report to, but if you do use New Relic it is configured to show you
+detailed metrics.  I recommend turning off transaction traces for long
+purge jobs to reduce your memory footprint.
 
 ## Testing
 
-To run the specs, start a local mysql instance.  The default user is root with an empty password.
-Override the user/password with environment variables `DB_USER` and `DB_PASSWORD`.  The test
-creates a db called 'cstest'.
+To run the specs, start a local mysql instance.  The default user is
+root with an empty password.  Override the user/password with
+environment variables `DB_USER` and `DB_PASSWORD`.  The test creates a
+db called 'cstest'.
 
 ## Contributing
 
@@ -197,5 +227,6 @@ Covered by the MIT [LICENSE](LICENSE.txt).
 
 ### Credits
 
-This was all inspired and informed by [Percona's `pt-archiver` script](http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html)
+This was all inspired and informed by [Percona's `pt-archiver`
+script](http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html)
 written by Baron Schwartz.

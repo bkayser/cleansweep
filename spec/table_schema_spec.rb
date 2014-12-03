@@ -21,7 +21,7 @@ describe CleanSweep::TableSchema do
     end
 
     it 'should produce all select columns' do
-      expect(schema.select_columns).to eq([:id, :account, :timestamp])
+      expect(schema.column_names).to eq([:id, :account, :timestamp])
     end
 
     it 'should produce the ascending order clause' do
@@ -32,7 +32,7 @@ describe CleanSweep::TableSchema do
     it 'should produce an insert statement' do
       schema = CleanSweep::TableSchema.new Comment, key_name: 'comments_on_account_timestamp'
       rows = account_and_timestamp_rows
-      expect(schema.insert_statement(Comment, rows)).to eq("insert into `comments` (`id`,`account`,`timestamp`) values (1001,5,'2014-12-02 01:13:25'),(1002,2,'2014-12-02 00:13:25'),(1005,5,'2014-12-01 23:13:25')")
+      expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1001,5,'2014-12-02 01:13:25'),(1002,2,'2014-12-02 00:13:25'),(1005,5,'2014-12-01 23:13:25')")
     end
   end
 
@@ -59,7 +59,7 @@ describe CleanSweep::TableSchema do
     let(:schema) { CleanSweep::TableSchema.new Comment, key_name:'comments_on_account_timestamp', first_only: true }
 
     it 'should select all the rows' do
-      expect(schema.select_columns).to eq([:id, :account, :timestamp])
+      expect(schema.column_names).to eq([:id, :account, :timestamp])
     end
 
     it 'should only query using the first column of the index' do
@@ -83,7 +83,7 @@ describe CleanSweep::TableSchema do
 
   it 'should produce minimal select columns' do
     schema = CleanSweep::TableSchema.new Comment, key_name: 'PRIMARY'
-    expect(schema.select_columns).to eq([:id])
+    expect(schema.column_names).to eq([:id])
   end
 
   it 'should produce the from clause with an index' do
@@ -93,10 +93,10 @@ describe CleanSweep::TableSchema do
 
   it 'should include additional columns' do
     schema = CleanSweep::TableSchema.new Comment, key_name: 'comments_on_account_timestamp', extra_columns: %w[seen id]
-    expect(schema.select_columns).to eq([:seen, :id, :account, :timestamp])
+    expect(schema.column_names).to eq([:seen, :id, :account, :timestamp])
     rows = account_and_timestamp_rows
     rows.map! { |row| row.unshift 1 } # Insert 'seen' value to beginning of row
-    expect(schema.insert_statement(Comment, rows)).to eq("insert into `comments` (`seen`,`id`,`account`,`timestamp`) values (1,1001,5,'2014-12-02 01:13:25'),(1,1002,2,'2014-12-02 00:13:25'),(1,1005,5,'2014-12-01 23:13:25')")
+    expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`seen`,`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1,1001,5,'2014-12-02 01:13:25'),(1,1002,2,'2014-12-02 00:13:25'),(1,1005,5,'2014-12-01 23:13:25')")
 
   end
 

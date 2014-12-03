@@ -36,11 +36,23 @@ require 'stringio'
 #    The log instance to use.  Defaults to the <tt>ActiveRecord::Base.logger</tt>
 #    if not nil, otherwise it uses _$stdout_
 # [:dest_model]
-#    When this option is present nothing is deleted, and instead rows are copied to
-#    the table for this model.  This model must
-#    have identically named columns as the source model.  By default, only columns in the
+#    Specifies the model for the delete operation, or the copy operation if in copy mode.
+#    When this option is present nothing is deleted in the model table.  Instead, rows
+#    are either inserted into this table or deleted from this table.
+#    The columns in this model must include the primary key columns found in the source
+#    model.  If they have different names you need to specify them with the
+#    <tt>dest_columns</tt> option.
+# [:copy_only]
+#    Specifies copy mode, where rows are inserted into the destination table instead of deleted from
+#    the model table. By default, only columns in the
 #    named index and primary key are copied but these can be augmented with columns in the
 #    <tt>copy_columns</tt> option.
+# [:dest_columns]
+#    This is a map of column names in the model to column names in the dest model when the
+#    corresponding models differ.  Only column names that are different need to be specified.
+#    For instance your table of account ids might have <tt>account_id</tt>
+#    as the primary key column, but you want to delete rows in the accounts table where the account id is
+#    the column named <tt>id</tt>
 # [:copy_columns]
 #    Extra columns to add when copying to a dest model.
 #
@@ -79,11 +91,15 @@ class CleanSweep::PurgeRunner
     @max_history      = options[:max_history]
     @max_repl_lag     = options[:max_repl_lag]
 
+    @copy_mode        = @target_model && options[:copy_only]
+
     @table_schema     = CleanSweep::TableSchema.new @model,
                                                     key_name: options[:index],
                                                     ascending: !options[:reverse],
                                                     extra_columns: options[:copy_columns],
-                                                    first_only: options[:first_only]
+                                                    first_only: options[:first_only],
+                                                    dest_model: @target_model,
+                                                    dest_columns: options[:dest_columns]
 
     if (@max_history || @max_repl_lag)
       @mysql_status = CleanSweep::PurgeRunner::MysqlStatus.new model: @model,
@@ -106,7 +122,7 @@ class CleanSweep::PurgeRunner
 
 
   def copy_mode?
-    @target_model.present?    
+    @copy_mode
   end
 
   # Execute the purge in chunks according to the parameters given on instance creation.
@@ -117,7 +133,10 @@ class CleanSweep::PurgeRunner
   #
   def execute_in_batches
 
-    print_queries($stdout) and return 0 if @dry_run
+    if @dry_run
+      print_queries($stdout)
+      return 0
+    end
 
     @start = Time.now
     verb = copy_mode? ? "copying" : "purging"
@@ -146,7 +165,7 @@ class CleanSweep::PurgeRunner
       last_row = rows.last
       if copy_mode?
         metric_op_name = 'INSERT'
-        statement = @table_schema.insert_statement(@target_model, rows)
+        statement = @table_schema.insert_statement(rows)
       else
         metric_op_name = 'DELETE'
         statement = @table_schema.delete_statement(rows)
@@ -194,7 +213,7 @@ class CleanSweep::PurgeRunner
     io.puts format_query('    ', @table_schema.scope_to_next_chunk(@query, rows.first).to_sql)
     if copy_mode?
       io.puts "Insert Statement:"
-      io.puts format_query('    ', @table_schema.insert_statement(@target_model, rows))
+      io.puts format_query('    ', @table_schema.insert_statement(rows))
     else
       io.puts "Delete Statement:"
       io.puts format_query('    ', @table_schema.delete_statement(rows))

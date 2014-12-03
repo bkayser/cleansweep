@@ -2,7 +2,7 @@
 class CleanSweep::TableSchema
 
   # The list of columns used when selecting, the union of pk and traversing key columns
-  attr_reader :select_columns
+  attr_reader :columns
 
   # The schema for the primary key
   attr_reader :primary_key
@@ -18,8 +18,17 @@ class CleanSweep::TableSchema
     ascending            = options.include?(:ascending) ? options[:ascending] : true
     first_only           = options[:first_only]
     @model               = model
+    @dest_model          = options[:dest_model] || @model
+
+    # Downcase and symbolize the entries in the column name map:
+    dest_columns_map     = Hash[*(options[:dest_columns] || {}).to_a.flatten.map{|n| n.to_s.downcase.to_sym}]
+
     @name                = @model.table_name
-    @select_columns      = (options[:extra_columns] && options[:extra_columns].map(&:to_sym)) || []
+
+    @columns      =
+      (options[:extra_columns] || []).map do | extra_col_name |
+        CleanSweep::TableSchema::ColumnSchema.new extra_col_name, model
+      end
 
     key_schemas = build_indexes
 
@@ -28,31 +37,40 @@ class CleanSweep::TableSchema
     raise "Table #{model.table_name} must have a primary key" unless key_schemas.include? 'primary'
 
     @primary_key = key_schemas['primary']
-    @primary_key.add_columns_to @select_columns
+    @primary_key.add_columns_to @columns
     if traversing_key_name
       traversing_key_name.downcase!
       raise "BTREE Index #{traversing_key_name} not found" unless key_schemas.include? traversing_key_name
       @traversing_key = key_schemas[traversing_key_name]
-      @traversing_key.add_columns_to @select_columns
+      @traversing_key.add_columns_to @columns
       @traversing_key.ascending = ascending
       @traversing_key.first_only = first_only
     end
 
+    # Specify the column names in the destination map, if provided
+    @columns.each do | column |
+      column.dest_name = dest_columns_map[column.name]
+    end
+
   end
 
-  def insert_statement(target_model, rows)
-    "insert into #{target_model.quoted_table_name} (#{quoted_column_names}) values #{quoted_row_values(rows)}"
+  def column_names
+    @columns.map(&:name)
+  end
+
+  def insert_statement(rows)
+    "insert into #{@dest_model.quoted_table_name} (#{quoted_dest_column_names}) values #{quoted_row_values(rows)}"
   end
 
   def delete_statement(rows)
     rec_criteria = rows.map do | row |
       row_compares = []
       @primary_key.columns.each do |column|
-        row_compares << "#{column.quoted_name} = #{column.quoted_value(row)}"
+        row_compares << "#{column.quoted_dest_name} = #{column.quoted_value(row)}"
       end
       "(" + row_compares.join(" AND ") + ")"
     end
-    "DELETE FROM #{@model.quoted_table_name} WHERE #{rec_criteria.join(" OR ")}"
+    "DELETE FROM #{@dest_model.quoted_table_name} WHERE #{rec_criteria.join(" OR ")}"
   end
 
   def initial_scope
@@ -82,15 +100,20 @@ class CleanSweep::TableSchema
   end
 
   def quoted_column_names
-    select_columns.map{|c| "`#{c}`"}.join(",")
+    columns.map{|c| "#{@model.quoted_table_name}.#{c.quoted_name}"}.join(",")
+  end
+
+  def quoted_dest_column_names
+    columns.map{|c| "#{@dest_model.quoted_table_name}.#{c.quoted_dest_name}"}.join(",")
   end
 
   def quoted_row_values(rows)
     rows.map do |vec|
-      quoted_column_values = vec.map do |col_value|
-        @model.connection.quote(col_value)
-      end.join(",")
-      "(#{quoted_column_values})"
+      row = []
+      columns.each_with_index do | col, i |
+        row << @model.quote_value(vec[i], col.ar_column)
+      end
+      "(#{row.join(',')})"
     end.join(",")
   end
 
