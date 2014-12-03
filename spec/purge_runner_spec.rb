@@ -75,17 +75,17 @@ Initial Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
     WHERE (timestamp < '2014-11-25 21:47:43')
-    ORDER BY `account` ASC,`timestamp` ASC
+    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Chunk Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC
+    WHERE (timestamp < '2014-11-25 21:47:43') AND (`comments`.`account` > 0 OR (`comments`.`account` = 0 AND `comments`.`timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Delete Statement:
     DELETE
     FROM `comments`
-    WHERE (`id` = 2)
+    WHERE (`comments`.`id` = 2)
 EOF
         end
       end

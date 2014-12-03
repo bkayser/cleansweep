@@ -66,7 +66,7 @@ class CleanSweep::TableSchema
     rec_criteria = rows.map do | row |
       row_compares = []
       @primary_key.columns.each do |column|
-        row_compares << "#{column.quoted_dest_name} = #{column.quoted_value(row)}"
+        row_compares << "#{column.quoted_dest_name(@dest_model)} = #{column.quoted_value(row)}"
       end
       "(" + row_compares.join(" AND ") + ")"
     end
@@ -100,11 +100,11 @@ class CleanSweep::TableSchema
   end
 
   def quoted_column_names
-    columns.map{|c| "#{@model.quoted_table_name}.#{c.quoted_name}"}.join(",")
+    columns.map{|c| "#{c.quoted_name}"}.join(",")
   end
 
   def quoted_dest_column_names
-    columns.map{|c| "#{@dest_model.quoted_table_name}.#{c.quoted_dest_name}"}.join(",")
+    columns.map{|c| c.quoted_dest_name(@dest_model)}.join(",")
   end
 
   def quoted_row_values(rows)

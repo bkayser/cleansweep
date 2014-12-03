@@ -12,11 +12,11 @@ class CleanSweep::TableSchema::ColumnSchema
   end
 
   def quoted_name
-    "`#{name}`"
+    quote_column_name(@model, name)
   end
 
-  def quoted_dest_name
-    "`#{@dest_name || @name}`"
+  def quoted_dest_name(dest_model)
+    quote_column_name(dest_model, @dest_name || @name)
   end
 
   def value(row)
@@ -29,6 +29,11 @@ class CleanSweep::TableSchema::ColumnSchema
 
   def == other
     return other && name == other.name
+  end
+
+  private
+  def quote_column_name(model, column_name)
+    model.connection.quote_table_name(model.table_name) + "." + model.connection.quote_column_name(column_name)
   end
 end
 

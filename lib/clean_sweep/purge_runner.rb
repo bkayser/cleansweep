@@ -209,6 +209,11 @@ class CleanSweep::PurgeRunner
     io.puts 'Initial Query:'
     io.puts format_query('    ', @query.to_sql)
     rows = @model.connection.select_rows @query.limit(1).to_sql
+    if rows.empty?
+      # Don't have any sample data to use for the sample queries, so use NULL values just
+      # so the query will print out.
+      rows << [nil] * 100
+    end
     io.puts "Chunk Query:"
     io.puts format_query('    ', @table_schema.scope_to_next_chunk(@query, rows.first).to_sql)
     if copy_mode?

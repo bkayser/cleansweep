@@ -17,7 +17,7 @@ describe CleanSweep::TableSchema do
     it 'should produce an ascending chunk clause' do
       rows = account_and_timestamp_rows
       expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-          .to include("(`account` > 5 OR (`account` = 5 AND `timestamp` > '2014-12-01 23:13:25'))")
+          .to include("(`comments`.`account` > 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` > '2014-12-01 23:13:25'))")
     end
 
     it 'should produce all select columns' do
@@ -25,7 +25,7 @@ describe CleanSweep::TableSchema do
     end
 
     it 'should produce the ascending order clause' do
-      expect(schema.initial_scope.to_sql).to include('`account` ASC,`timestamp` ASC')
+      expect(schema.initial_scope.to_sql).to include('`comments`.`account` ASC,`comments`.`timestamp` ASC')
     end
 
 
@@ -43,14 +43,14 @@ describe CleanSweep::TableSchema do
     it 'should produce a descending where clause' do
       rows = account_and_timestamp_rows
       expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-          .to include("(`account` < 5 OR (`account` = 5 AND `timestamp` < '2014-12-01 23:13:25'))")
+          .to include("(`comments`.`account` < 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` < '2014-12-01 23:13:25'))")
     end
 
 
     it 'should produce the descending order clause' do
       rows = account_and_timestamp_rows
       expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-          .to include("`account` DESC,`timestamp` DESC")
+          .to include("`comments`.`account` DESC,`comments`.`timestamp` DESC")
     end
 
   end
@@ -65,7 +65,7 @@ describe CleanSweep::TableSchema do
     it 'should only query using the first column of the index' do
       rows = account_and_timestamp_rows
       expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-        .to include(" (`account` >= 5) ")
+        .to include(" (`comments`.`account` >= 5) ")
 
     end
 

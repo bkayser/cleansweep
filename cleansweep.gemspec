@@ -9,12 +9,15 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Bill Kayser"]
   spec.email         = ["bkayser@newrelic.com"]
   spec.summary       = %q{Utility to purge or archive rows in mysql tables}
+
+  spec.platform      = Gem::Platform::RUBY
   spec.required_ruby_version = '~> 2'
+
   spec.description   = <<-EOF
      Purge data from mysql innodb tables efficiently with low overhead and impact.
      Based on the Percona pt-archive utility.
   EOF
-  spec.homepage      = "http://github.com/bkayser/cleansweep"
+  spec.homepage      = "http://bkayser.github.com/cleansweep"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
