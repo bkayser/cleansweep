@@ -158,11 +158,26 @@ these.</p>
 _$stdout_</p>
 </dd><dt>:dest_model
 <dd>
-<p>When this option is present nothing is deleted, and instead rows are copied
-to the table for this model.  This model must have identically named
-columns as the source model.  By default, only columns in the named index
-and primary key are copied but these can be augmented with columns in the
-<code>copy_columns</code> option.</p>
+<p>Specifies the model for the delete operation, or the copy operation if in
+copy mode. When this option is present nothing is deleted in the model
+table.  Instead, rows are either inserted into this table or deleted from
+this table. The columns in this model must include the primary key columns
+found in the source model.  If they have different names you need to
+specify them with the <code>dest_columns</code> option.</p>
+</dd><dt>:copy_only
+<dd>
+<p>Specifies copy mode, where rows are inserted into the destination table
+instead of deleted from the model table. By default, only columns in the
+named index and primary key are copied but these can be augmented with
+columns in the <code>copy_columns</code> option.</p>
+</dd><dt>:dest_columns
+<dd>
+<p>This is a map of column names in the model to column names in the dest
+model when the corresponding models differ.  Only column names that are
+different need to be specified. For instance your table of account ids
+might have <code>account_id</code> as the primary key column, but you want
+to delete rows in the accounts table where the account id is the column
+named <code>id</code></p>
 </dd><dt>:copy_columns
 <dd>
 <p>Extra columns to add when copying to a dest model.</p>
@@ -412,18 +427,6 @@ creation.</p>
       <pre class="lines">
 
 
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
 80
 81
 82
@@ -449,10 +452,26 @@ creation.</p>
 102
 103
 104
-105</pre>
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 68</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 80</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='op'>=</span><span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
   <span class='ivar'>@model</span>     <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:model</span><span class='rbracket'>]</span> <span class='kw'>or</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>source model class required</span><span class='tstring_end'>&quot;</span></span>
@@ -468,11 +487,15 @@ creation.</p>
   <span class='ivar'>@max_history</span>      <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:max_history</span><span class='rbracket'>]</span>
   <span class='ivar'>@max_repl_lag</span>     <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:max_repl_lag</span><span class='rbracket'>]</span>
 
+  <span class='ivar'>@copy_mode</span>        <span class='op'>=</span> <span class='ivar'>@target_model</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:copy_only</span><span class='rbracket'>]</span>
+
   <span class='ivar'>@table_schema</span>     <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>TableSchema</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='ivar'>@model</span><span class='comma'>,</span>
                                                   <span class='label'>key_name:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:index</span><span class='rbracket'>]</span><span class='comma'>,</span>
                                                   <span class='label'>ascending:</span> <span class='op'>!</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:reverse</span><span class='rbracket'>]</span><span class='comma'>,</span>
                                                   <span class='label'>extra_columns:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:copy_columns</span><span class='rbracket'>]</span><span class='comma'>,</span>
-                                                  <span class='label'>first_only:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:first_only</span><span class='rbracket'>]</span>
+                                                  <span class='label'>first_only:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:first_only</span><span class='rbracket'>]</span><span class='comma'>,</span>
+                                                  <span class='label'>dest_model:</span> <span class='ivar'>@target_model</span><span class='comma'>,</span>
+                                                  <span class='label'>dest_columns:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:dest_columns</span><span class='rbracket'>]</span>
 
   <span class='kw'>if</span> <span class='lparen'>(</span><span class='ivar'>@max_history</span> <span class='op'>||</span> <span class='ivar'>@max_repl_lag</span><span class='rparen'>)</span>
     <span class='ivar'>@mysql_status</span> <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='op'>::</span><span class='const'>MysqlStatus</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='label'>model:</span> <span class='ivar'>@model</span><span class='comma'>,</span>
@@ -531,12 +554,12 @@ necessary</p>
       <pre class="lines">
 
 
-66
-67
-68</pre>
+78
+79
+80</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 66</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 78</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mysql_status'>mysql_status</span>
   <span class='ivar'>@mysql_status</span>
@@ -590,15 +613,15 @@ necessary</p>
       <pre class="lines">
 
 
-108
-109
-110</pre>
+124
+125
+126</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 108</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 124</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_copy_mode?'>copy_mode?</span>
-  <span class='ivar'>@target_model</span><span class='period'>.</span><span class='id identifier rubyid_present?'>present?</span>    
+  <span class='ivar'>@copy_mode</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -635,22 +658,6 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
       <pre class="lines">
 
 
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
 134
 135
 136
@@ -697,10 +704,26 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
 177
 178
 179
-180</pre>
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 118</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 134</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
 
@@ -733,7 +756,7 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
     <span class='id identifier rubyid_last_row'>last_row</span> <span class='op'>=</span> <span class='id identifier rubyid_rows'>rows</span><span class='period'>.</span><span class='id identifier rubyid_last'>last</span>
     <span class='kw'>if</span> <span class='id identifier rubyid_copy_mode?'>copy_mode?</span>
       <span class='id identifier rubyid_metric_op_name'>metric_op_name</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>INSERT</span><span class='tstring_end'>&#39;</span></span>
-      <span class='id identifier rubyid_statement'>statement</span> <span class='op'>=</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_insert_statement'>insert_statement</span><span class='lparen'>(</span><span class='ivar'>@target_model</span><span class='comma'>,</span> <span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_statement'>statement</span> <span class='op'>=</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_insert_statement'>insert_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span>
     <span class='kw'>else</span>
       <span class='id identifier rubyid_metric_op_name'>metric_op_name</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>DELETE</span><span class='tstring_end'>&#39;</span></span>
       <span class='id identifier rubyid_statement'>statement</span> <span class='op'>=</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_delete_statement'>delete_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span>
@@ -785,23 +808,23 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
       <pre class="lines">
 
 
-189
-190
-191
-192
-193
-194
-195
-196
-197
-198
-199
-200
-201
-202</pre>
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 189</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 205</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_print_queries'>print_queries</span><span class='lparen'>(</span><span class='id identifier rubyid_io'>io</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Initial Query:</span><span class='tstring_end'>&#39;</span></span>
@@ -811,7 +834,7 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
   <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_format_query'>format_query</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>    </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_scope_to_next_chunk'>scope_to_next_chunk</span><span class='lparen'>(</span><span class='ivar'>@query</span><span class='comma'>,</span> <span class='id identifier rubyid_rows'>rows</span><span class='period'>.</span><span class='id identifier rubyid_first'>first</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_sql'>to_sql</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='id identifier rubyid_copy_mode?'>copy_mode?</span>
     <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Insert Statement:</span><span class='tstring_end'>&quot;</span></span>
-    <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_format_query'>format_query</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>    </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_insert_statement'>insert_statement</span><span class='lparen'>(</span><span class='ivar'>@target_model</span><span class='comma'>,</span> <span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_format_query'>format_query</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>    </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_insert_statement'>insert_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span><span class='rparen'>)</span>
   <span class='kw'>else</span>
     <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Delete Statement:</span><span class='tstring_end'>&quot;</span></span>
     <span class='id identifier rubyid_io'>io</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_format_query'>format_query</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>    </span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@table_schema</span><span class='period'>.</span><span class='id identifier rubyid_delete_statement'>delete_statement</span><span class='lparen'>(</span><span class='id identifier rubyid_rows'>rows</span><span class='rparen'>)</span><span class='rparen'>)</span>
@@ -837,12 +860,12 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
       <pre class="lines">
 
 
-182
-183
-184</pre>
+198
+199
+200</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 182</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/purge_runner.rb', line 198</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_sleep'>sleep</span> <span class='id identifier rubyid_duration'>duration</span>
   <span class='const'>Kernel</span><span class='period'>.</span><span class='id identifier rubyid_sleep'>sleep</span> <span class='id identifier rubyid_duration'>duration</span>
@@ -857,7 +880,7 @@ creation. Will raise <code>CleanSweep::PurgeStopped</code> if a
 </div>
 
     <div id="footer">
-  Generated on Tue Dec  2 14:58:16 2014 by
+  Generated on Tue Dec  2 22:29:30 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.4).
 </div>

@@ -62,10 +62,9 @@
     <iframe id="search_frame"></iframe>
 
     <div id="content"><div id='filecontents'>
-<h1 id="label-Cleansweep">Cleansweep</h1>
-
-<p>Utilities for doing purges in an efficient, low-impact manner on mysql
-innodb tables. Loosely based on the Percona pt-archive utility.</p>
+<p>Cleansweep is a utility for scripting purges using ruby in an efficient,
+low-impact manner on mysql innodb tables. Based on the Percona
+<code>pt-archive</code> utility.</p>
 
 <h2 id="label-Installation">Installation</h2>
 
@@ -180,6 +179,7 @@ Comments older than one week are copied.</p>
 <pre class="code ruby"><code class="ruby">copier = CleanSweep::PurgeRunner.new model: Comment,
                                            index: &#39;comments_on_account_timestamp&#39;,
                                            dest_model: ExpiredComment,
+                                           copy_only: true,
                                            copy_columns: %w[liked] do do | model |
         model.where(&#39;last_used_at &lt; ?&#39;, 1.week.ago)
       end
@@ -187,6 +187,20 @@ Comments older than one week are copied.</p>
 
 <p>The <code>copy_columns</code> option specifies additional columns to be
 inserted into the <code>expired_comments</code> table.</p>
+
+<p>If the column names are different in the destination table than in the
+source table, you can specify a mapping with the <code>dest_columns</code>
+option which takes a map of source column name to destination name.</p>
+
+<h3 id="label-Deleting+rows+in+another+table">Deleting rows in another table</h3>
+
+<p>What if you want to query one table and delete those rows in another? I
+needed this when I built a temporary table of account ids that referenced
+deleted accounts. I then wanted to delete rows in other tables that
+referenced those account ids. To do that, specify a <code>dest_table</code>
+without specifying <code>copy_only</code> mode. This will execute the
+delete statement on the destination table without removing rows from the
+source table.</p>
 
 <h3 id="label-Watching+the+history+list+and+replication+lag">Watching the history list and replication lag</h3>
 
@@ -235,8 +249,8 @@ support this  mode.</p>
 
 <p>There are a number of other options you can use to tune the script. For
 details look at the <a
-href="blob/master/lib/clean_sweep/purge_runner.rb">API on the PurgeRunner
-class</a></p>
+href="http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html">API
+on the PurgeRunner class</a></p>
 
 <h3 id="label-NewRelic+integration">NewRelic integration</h3>
 
@@ -283,7 +297,7 @@ pt-archiver script</a> written by Baron Schwartz.</p>
 </div></div>
 
     <div id="footer">
-  Generated on Tue Dec  2 14:58:16 2014 by
+  Generated on Tue Dec  2 22:29:30 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.4).
 </div>

@@ -109,6 +109,64 @@
       <li class="public ">
   <span class="summary_signature">
     
+      <a href="#ar_column-instance_method" title="#ar_column (instance method)">- (Object) <strong>ar_column</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Returns the value of attribute ar_column.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#dest_name%3D-instance_method" title="#dest_name= (instance method)">- (Object) <strong>dest_name</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+      <span class="note title writeonly">writeonly</span>
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Sets the attribute dest_name.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#name-instance_method" title="#name (instance method)">- (Object) <strong>name</strong> </a>
     
 
@@ -178,6 +236,28 @@
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#%3D%3D-instance_method" title="#== (instance method)">- (Object) <strong>==</strong>(other) </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#initialize-instance_method" title="#initialize (instance method)">- (ColumnSchema) <strong>initialize</strong>(name, model) </a>
     
 
@@ -197,6 +277,28 @@
     <span class="summary_desc"><div class='inline'>
 <p>A new instance of ColumnSchema.</p>
 </div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#quoted_dest_name-instance_method" title="#quoted_dest_name (instance method)">- (Object) <strong>quoted_dest_name</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
   
 </li>
 
@@ -299,21 +401,21 @@
       <pre class="lines">
 
 
-6
 7
 8
 9
 10
-11</pre>
+11
+12</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 6</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 7</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
   <span class='ivar'>@name</span> <span class='op'>=</span> <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span>
   <span class='id identifier rubyid_col_num'>col_num</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_column_names'>column_names</span><span class='period'>.</span><span class='id identifier rubyid_index'>index</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span> <span class='kw'>or</span> <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Can&#39;t find </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> in </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
   <span class='ivar'>@model</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span>
-  <span class='ivar'>@column</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_columns'>columns</span><span class='lbracket'>[</span><span class='id identifier rubyid_col_num'>col_num</span><span class='rbracket'>]</span>
+  <span class='ivar'>@ar_column</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_columns'>columns</span><span class='lbracket'>[</span><span class='id identifier rubyid_col_num'>col_num</span><span class='rbracket'>]</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -328,7 +430,113 @@
       
       <span id=""></span>
       <div class="method_details first">
-  <h3 class="signature first" id="name-instance_method">
+  <h3 class="signature first" id="ar_column-instance_method">
+  
+    - (<tt>Object</tt>) <strong>ar_column</strong>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns the value of attribute ar_column</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+3
+4
+5</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 3</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_ar_column'>ar_column</span>
+  <span class='ivar'>@ar_column</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="dest_name=-instance_method">
+  
+    - (<tt>Object</tt>) <strong>dest_name=</strong>(value)  <span class="extras">(writeonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Sets the attribute dest_name</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'></span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>the value to set the attribute dest_name to.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+5
+6
+7</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 5</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_dest_name='>dest_name=</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='rparen'>)</span>
+  <span class='ivar'>@dest_name</span> <span class='op'>=</span> <span class='id identifier rubyid_value'>value</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id=""></span>
+      <div class="method_details ">
+  <h3 class="signature " id="name-instance_method">
   
     - (<tt>Object</tt>) <strong>name</strong>  <span class="extras">(readonly)</span>
   
@@ -419,7 +627,67 @@
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="quoted_name-instance_method">
+  <h3 class="signature first" id="==-instance_method">
+  
+    - (<tt>Object</tt>) <strong>==</strong>(other) 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+30
+31
+32</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 30</span>
+
+<span class='kw'>def</span> <span class='op'>==</span> <span class='id identifier rubyid_other'>other</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_other'>other</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_name'>name</span> <span class='op'>==</span> <span class='id identifier rubyid_other'>other</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="quoted_dest_name-instance_method">
+  
+    - (<tt>Object</tt>) <strong>quoted_dest_name</strong> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+18
+19
+20</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 18</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_quoted_dest_name'>quoted_dest_name</span>
+  <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>`</span><span class='embexpr_beg'>#{</span><span class='ivar'>@dest_name</span> <span class='op'>||</span> <span class='ivar'>@name</span><span class='embexpr_end'>}</span><span class='tstring_content'>`</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="quoted_name-instance_method">
   
     - (<tt>Object</tt>) <strong>quoted_name</strong> 
   
@@ -433,12 +701,12 @@
       <pre class="lines">
 
 
-13
 14
-15</pre>
+15
+16</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 13</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 14</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_quoted_name'>quoted_name</span>
   <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>`</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'>`</span><span class='tstring_end'>&quot;</span></span>
@@ -463,15 +731,15 @@
       <pre class="lines">
 
 
-19
-20
-21</pre>
+26
+27
+28</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 26</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_quoted_value'>quoted_value</span><span class='lparen'>(</span><span class='id identifier rubyid_row'>row</span><span class='rparen'>)</span>
-  <span class='ivar'>@model</span><span class='period'>.</span><span class='id identifier rubyid_quote_value'>quote_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='id identifier rubyid_row'>row</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='ivar'>@column</span><span class='rparen'>)</span>
+  <span class='ivar'>@model</span><span class='period'>.</span><span class='id identifier rubyid_quote_value'>quote_value</span><span class='lparen'>(</span><span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='id identifier rubyid_row'>row</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='ivar'>@ar_column</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -493,12 +761,12 @@
       <pre class="lines">
 
 
-16
-17
-18</pre>
+22
+23
+24</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 16</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/column_schema.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_value'>value</span><span class='lparen'>(</span><span class='id identifier rubyid_row'>row</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_row'>row</span><span class='lbracket'>[</span><span class='id identifier rubyid_select_position'>select_position</span><span class='rbracket'>]</span>
@@ -513,7 +781,7 @@
 </div>
 
     <div id="footer">
-  Generated on Tue Dec  2 14:58:17 2014 by
+  Generated on Tue Dec  2 22:29:31 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.4).
 </div>
