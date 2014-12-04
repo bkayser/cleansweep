@@ -1,34 +1,37 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Cleansweep by bkayser</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <title>Cleansweep by bkayser</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Cleansweep</h1>
-        <p>Ruby Utility for purging data in mysql</p>
+    <div id="container">
+      <div class="inner">
 
-        <p class="view"><a href="https://github.com/bkayser/cleansweep">View the Project on GitHub <small>bkayser/cleansweep</small></a></p>
+        <header>
+          <h1>Cleansweep</h1>
+          <h2>Ruby Utility for purging data in mysql</h2>
+        </header>
 
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/bkayser/cleansweep/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/bkayser/cleansweep/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/bkayser/cleansweep" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
 
-        <ul>
-          <li><a href="https://github.com/bkayser/cleansweep/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/bkayser/cleansweep/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/bkayser/cleansweep">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p>Cleansweep is a utility for scripting purges using ruby in an
+        <hr>
+
+        <section id="main_content">
+          <p>Cleansweep is a utility for scripting purges using ruby in an
 efficient, low-impact manner on mysql innodb tables.  Based on the
 Percona <code>pt-archive</code> utility.</p>
 
@@ -104,7 +107,8 @@ statements used:</p>
     Chunk Query:
         <span class="pl-k">SELECT</span>  <span class="pl-s1"><span class="pl-pds">`</span>id<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span>
         <span class="pl-k">FROM</span> <span class="pl-s1"><span class="pl-pds">`</span>comments<span class="pl-pds">`</span></span> FORCE INDEX(comments_on_account_timestamp)
-        <span class="pl-k">WHERE</span> (<span class="pl-st">timestamp</span> <span class="pl-k">&lt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-25 21:47:43<span class="pl-pds">'</span></span>) <span class="pl-k">AND</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-c1">0</span> <span class="pl-k">OR</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">=</span> <span class="pl-c1">0</span> <span class="pl-k">AND</span> <span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-18 21:47:43<span class="pl-pds">'</span></span>))\n    <span class="pl-k">ORDER BY</span> <span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>
+        <span class="pl-k">WHERE</span> (<span class="pl-st">timestamp</span> <span class="pl-k">&lt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-25 21:47:43<span class="pl-pds">'</span></span>) <span class="pl-k">AND</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-c1">0</span> <span class="pl-k">OR</span> (<span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">=</span> <span class="pl-c1">0</span> <span class="pl-k">AND</span> <span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">&gt;</span> <span class="pl-s1"><span class="pl-pds">'</span>2014-11-18 21:47:43<span class="pl-pds">'</span></span>))
+    <span class="pl-k">ORDER BY</span> <span class="pl-s1"><span class="pl-pds">`</span>account<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>,<span class="pl-s1"><span class="pl-pds">`</span>timestamp<span class="pl-pds">`</span></span> <span class="pl-k">ASC</span>
         <span class="pl-k">LIMIT</span> <span class="pl-c1">500</span>
     <span class="pl-k">Delete</span> Statement:
         <span class="pl-k">DELETE</span>
@@ -175,6 +179,41 @@ tables that referenced those account ids.  To do that, specify a
 the delete statement on the destination table without removing rows
 from the source table.</p>
 
+<p>Here's an example:</p>
+
+<div class="highlight highlight-sql"><pre>      create temporary table expired_metrics (
+           metric_id <span class="pl-st">int</span>,
+           account_id <span class="pl-st">int</span>,
+           <span class="pl-s">primary key</span> (account_id, metric_id)
+      EOF</pre></div>
+
+<p>Then run a job to pull account_id, metric_id into the expired metrics table:</p>
+
+<div class="highlight highlight-ruby"><pre>copier <span class="pl-k">=</span> <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span> <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>index_on_metric_account_id<span class="pl-pds">'</span></span>,
+                                     <span class="pl-c1">model:</span> <span class="pl-vo">AccountMetric</span>,
+                                     <span class="pl-c1">dest_model:</span> <span class="pl-vo">ExpiredMetric</span>,
+                                     <span class="pl-c1">copy_only:</span> <span class="pl-c1">true</span>) <span class="pl-k">do </span>| <span class="pl-vo">model</span> |
+    model.where(<span class="pl-s1"><span class="pl-pds">"</span>last_used_at &lt; ?)<span class="pl-pds">"</span></span>, expiration_date)
+<span class="pl-k">end</span>
+copier.execute_in_batches</pre></div>
+
+<p>Now create as many jobs as you need for the tables which refer to these metrics:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
+                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
+                            <span class="pl-c1">dest_model:</span> <span class="pl-vo">Metric</span>,
+                            <span class="pl-c1">dest_columns:</span> { <span class="pl-s1"><span class="pl-pds">'</span>metric_id<span class="pl-pds">'</span></span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span>} ).execute_in_batches
+
+<span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
+                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
+                            <span class="pl-c1">dest_model:</span> <span class="pl-vo">ChartMetric</span>).execute_in_batches
+
+<span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
+                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
+                            <span class="pl-c1">dest_model:</span> <span class="pl-vo">SystemMetric</span>).execute_in_batches</pre></div>
+
+<p>These will delete the expired metrics from all the tables that refer to them.</p>
+
 <h3>
 <a id="watching-the-history-list-and-replication-lag" class="anchor" href="#watching-the-history-list-and-replication-lag" aria-hidden="true"><span class="octicon octicon-link"></span></a>Watching the history list and replication lag</h3>
 
@@ -231,7 +270,23 @@ class</a></p>
 <p>The script requires the <a href="http://github.com/newrelic/rpm">New Relic</a>
 gem.  It won't impact anyting if you don't have a New Relic account to
 report to, but if you do use New Relic it is configured to show you
-detailed metrics.  I recommend turning off transaction traces for long
+detailed metrics.</p>
+
+<p>In order to see the data in New Relic your purge must be identified as
+a background transaction.  If you are running in Resque or DelayedJob,
+it will automatically be tagged as such, but if you are just invoking
+your purge directly, you'll need to tag it as a background
+transaction.  The easy way to do that is shown in this example:</p>
+
+<div class="highlight highlight-ruby"><pre>    <span class="pl-k">class</span> <span class="pl-en">Purge</span>
+      <span class="pl-k">include</span> <span class="pl-s3">NewRelic</span>::<span class="pl-s3">Agent</span>::<span class="pl-s3">Instrumentation</span>::<span class="pl-vo">ControllerInstrumentation</span>
+      <span class="pl-k">def</span> <span class="pl-en">run</span>()
+         ...
+      <span class="pl-k">end</span>
+      add_transaction_tracer <span class="pl-c1">:run</span>
+    <span class="pl-k">end</span></pre></div>
+
+<p>Also, I recommend turning off transaction traces for long
 purge jobs to reduce your memory footprint.</p>
 
 <h2>
@@ -266,13 +321,15 @@ db called 'cstest'.</p>
 <p>This was all inspired and informed by <a href="http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html">Percona's <code>pt-archiver</code>
 script</a>
 written by Baron Schwartz.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/bkayser">bkayser</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+        </section>
+
+        <footer>
+          Cleansweep is maintained by <a href="https://github.com/bkayser">bkayser</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
   </body>
 </html>
