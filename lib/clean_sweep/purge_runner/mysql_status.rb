@@ -16,7 +16,7 @@ class CleanSweep::PurgeRunner::MysqlStatus
   def check!
     return if Time.now - @check_period < @last_check
     while (v = get_violations).any? do
-      @logger.warn("pausing 5 minutes (#{v.to_a.map{ |key, value| "#{key} = #{value}"}.join(", ")})") if !paused?
+      @logger.warn("pausing until threshold violations clear (#{v.to_a.map{ |key, value| "#{key} = #{value}"}.join(", ")})")
       @paused = true
       pause 5.minutes
     end
@@ -28,7 +28,7 @@ class CleanSweep::PurgeRunner::MysqlStatus
     violations = {}
     if @max_history
       current = get_history_length
-      violations["history length"] = current if threshold(@max_history) < current
+      violations["history length"] = "#{(current/1_000_000.0)} m" if threshold(@max_history) < current
     end
     if @max_replication_lag
       current = get_replication_lag

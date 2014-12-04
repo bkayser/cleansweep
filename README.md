@@ -77,7 +77,8 @@ statements used:
     Chunk Query:
         SELECT  `id`,`account`,`timestamp`
         FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-        WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `account` ASC,`timestamp` ASC
+        WHERE (timestamp < '2014-11-25 21:47:43') AND (`account` > 0 OR (`account` = 0 AND `timestamp` > '2014-11-18 21:47:43'))
+    ORDER BY `account` ASC,`timestamp` ASC
         LIMIT 500
     Delete Statement:
         DELETE
@@ -153,6 +154,46 @@ tables that referenced those account ids.  To do that, specify a
 the delete statement on the destination table without removing rows
 from the source table.
 
+Here's an example:
+
+```sql
+      create temporary table expired_metrics (
+           metric_id int,
+           account_id int,
+           primary key (account_id, metric_id)
+      EOF
+```
+Then run a job to pull account_id, metric_id into the expired metrics table:
+
+```ruby
+copier = CleanSweep::PurgeRunner.new index: 'index_on_metric_account_id',
+                                     model: AccountMetric,
+                                     dest_model: ExpiredMetric,
+                                     copy_only: true) do | model |
+    model.where("last_used_at < ?)", expiration_date)
+end
+copier.execute_in_batches
+```
+
+Now create as many jobs as you need for the tables which refer to these metrics:
+
+```ruby
+CleanSweep::PurgeRunner.new(model: ExpiredMetric,
+                            index: 'PRIMARY',
+                            dest_model: Metric,
+                            dest_columns: { 'metric_id' => 'id'} ).execute_in_batches
+
+CleanSweep::PurgeRunner.new(model: ExpiredMetric,
+                            index: 'PRIMARY',
+                            dest_model: ChartMetric).execute_in_batches
+
+CleanSweep::PurgeRunner.new(model: ExpiredMetric,
+                            index: 'PRIMARY',
+                            dest_model: SystemMetric).execute_in_batches
+```
+
+These will delete the expired metrics from all the tables that refer to them.
+
 ### Watching the history list and replication lag
 
 You can enter thresholds for the history list size and replication lag
@@ -201,7 +242,24 @@ class](http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html)
 The script requires the [New Relic](http://github.com/newrelic/rpm)
 gem.  It won't impact anyting if you don't have a New Relic account to
 report to, but if you do use New Relic it is configured to show you
-detailed metrics.  I recommend turning off transaction traces for long
+detailed metrics.
+
+In order to see the data in New Relic your purge must be identified as
+a background transaction.  If you are running in Resque or DelayedJob,
+it will automatically be tagged as such, but if you are just invoking
+your purge directly, you'll need to tag it as a background
+transaction.  The easy way to do that is shown in this example:
+
+```ruby
+    class Purge
+      include NewRelic::Agent::Instrumentation::ControllerInstrumentation
+      def run()
+         ...
+      end
+      add_transaction_tracer :run
+    end
+```
+Also, I recommend turning off transaction traces for long
 purge jobs to reduce your memory footprint.
 
 ## Testing
