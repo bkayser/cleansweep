@@ -171,8 +171,8 @@ class CleanSweep::PurgeRunner
         statement = @table_schema.delete_statement(rows)
       end
       log :debug, statement if @logger.level == Logger::DEBUG
-      chunk_deleted = NewRelic::Agent.with_database_metric_name(@target_model, metric_op_name) do
-        @model.connection.update statement
+      chunk_deleted = NewRelic::Agent.with_database_metric_name((@target_model||@model), metric_op_name) do
+        (@target_model||@model).connection.update statement
       end
 
       @total_deleted += chunk_deleted
