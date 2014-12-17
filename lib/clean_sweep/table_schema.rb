@@ -34,13 +34,13 @@ class CleanSweep::TableSchema
 
     # Primary key only supported, but we could probably get around this by adding
     # all columns as 'primary key columns'
-    raise "Table #{model.table_name} must have a primary key" unless key_schemas.include? 'primary'
+    @primary_key = find_primary_key(key_schemas)
+    raise "Table #{model.table_name} must have a primary key" unless @primary_key
 
-    @primary_key = key_schemas['primary']
     @primary_key.add_columns_to @columns
     if traversing_key_name
       traversing_key_name.downcase!
-      raise "BTREE Index #{traversing_key_name} not found" unless key_schemas.include? traversing_key_name
+      raise "BTREE Index #{traversing_key_name} not found in #@name" unless key_schemas.include? traversing_key_name
       @traversing_key = key_schemas[traversing_key_name]
       @traversing_key.add_columns_to @columns
       @traversing_key.ascending = ascending
@@ -123,12 +123,17 @@ class CleanSweep::TableSchema
     column_details.each do | col |
       key_name = col[2].downcase
       col_name = col[4].downcase
+      unique = col[1] != 1
       type = col[10]
       next if key_name != 'PRIMARY' && type != 'BTREE'  # Only BTREE indexes supported for traversing
-      indexes[key_name] ||= IndexSchema.new key_name, @model
+      indexes[key_name] ||= IndexSchema.new key_name, @model, unique
       indexes[key_name] << col_name
     end
     return indexes
+  end
+
+  def find_primary_key(indexes)
+    indexes['primary'] || indexes.values.find { | index_schema | index_schema.unique? }
   end
 
 end

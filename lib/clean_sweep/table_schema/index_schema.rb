@@ -1,16 +1,21 @@
-class CleanSweep::TableSchema::IndexSchema < Struct.new :name, :model, :ascending
+class CleanSweep::TableSchema::IndexSchema
 
   attr_accessor :columns, :name, :model, :ascending, :first_only, :dest_model
 
-  def initialize name, model
+  def initialize name, model, unique = false
     @model = model
     @columns = []
     @name = name
+    @unique = unique
   end
 
   # Add a column
   def << col_name
     @columns << CleanSweep::TableSchema::ColumnSchema.new(col_name, model)
+  end
+
+  def unique?
+    @unique
   end
 
   # Take columns referenced by this index and add them to the list if they

@@ -237,7 +237,7 @@ There are a number of other options you can use to tune the script.
 For details look at the [API on the `PurgeRunner`
 class](http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html)
 
-### NewRelic integration
+### New Relic integration
 
 The script requires the [New Relic](http://github.com/newrelic/rpm)
 gem.  It won't impact anyting if you don't have a New Relic account to

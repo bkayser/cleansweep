@@ -12,3 +12,4 @@ See the [documentation](http://bkayser.github.io/cleansweep) for details
 
 ### Version 1.0.3
 * Small bug in instrumentation and target model reference
+* Support first unique index as primary when primary key not found
