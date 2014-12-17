@@ -61,48 +61,55 @@
 
     <iframe id="search_frame"></iframe>
 
-    <div id="content"><div id='filecontents'>
-<p>Cleansweep is a utility for scripting purges using ruby in an efficient,
-low-impact manner on mysql innodb tables. Based on the Percona
-<code>pt-archive</code> utility.</p>
+    <div id="content"><div id='filecontents'><p>Cleansweep is a utility for scripting purges using ruby in an
+efficient, low-impact manner on mysql innodb tables.  Based on the
+Percona <code>pt-archive</code> utility.</p>
 
-<h2 id="label-Installation">Installation</h2>
+<h2>Installation</h2>
 
-<p>Add this line to your application&#39;s Gemfile:</p>
+<p>Add this line to your application's Gemfile:</p>
 
 <pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>cleansweep</span><span class='tstring_end'>&#39;</span></span>
 </code></pre>
 
 <p>And then execute:</p>
 
-<pre class="code ruby"><code class="ruby">$ bundle</code></pre>
+<pre class="code ruby"><code class="ruby">$ bundle
+</code></pre>
 
 <p>Or install it yourself as:</p>
 
-<pre class="code ruby"><code class="ruby">$ gem install cleansweep</code></pre>
+<pre class="code ruby"><code class="ruby">$ gem install cleansweep
+</code></pre>
 
-<h2 id="label-How+it+works">How it works</h2>
+<h2>How it works</h2>
 
-<p>Consider the table: <code>sql     create table comments (        `id`
-int(11) primary key auto_increment,        `timestamp` datetime,       
-`account` int(11),        `liked` boolean,        key
-comments_on_account_timestamp(account, timestamp)     ) </code> Assume
-there is an active record model for it:</p>
+<p>Consider the table:
+<code>sql
+    create table comments (
+       `id` int(11) primary key auto_increment,
+       `timestamp` datetime,
+       `account` int(11),
+       `liked` boolean,
+       key comments_on_account_timestamp(account, timestamp)
+    )
+</code>
+Assume there is an active record model for it:</p>
 
 <pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>Comment</span> <span class='op'>&lt;</span> <span class='const'>ActiveRecord</span><span class='op'>::</span><span class='const'>Base</span> <span class='semicolon'>;</span> <span class='kw'>end</span>
 </code></pre>
 
-<h3 id="label-Purging+by+traversing+an+index">Purging by traversing an index</h3>
+<h3>Purging by traversing an index</h3>
 
-<p>The most efficient way to work through a table is by scanning through an
-index one chunk at a time.</p>
+<p>The most efficient way to work through a table is by scanning through
+an index one chunk at a time.</p>
 
-<p>Let&#39;s assume we want to purge Comments older than 1 month. We can scan
-the primary key index or the <code>account</code>,<code>timestamp</code>
-index. In this case the latter will probably work better since we are
-evaluating the timestamp for the purge.</p>
+<p>Let's assume we want to purge Comments older than 1 month.  We can
+scan the primary key index or the <code>account</code>,<code>timestamp</code> index.  In
+this case the latter will probably work better since we are evaluating
+the timestamp for the purge.</p>
 
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_r'>r</span> <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='label'>model:</span> <span class='const'>Comment</span><span class='comma'>,</span>
+<pre class="code ruby"><code class="ruby">    <span class='id identifier rubyid_r'>r</span> <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='label'>model:</span> <span class='const'>Comment</span><span class='comma'>,</span>
                                     <span class='label'>index:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>comments_on_account_timestamp</span><span class='tstring_end'>&#39;</span></span> <span class='kw'>do</span> <span class='op'>|</span> <span class='id identifier rubyid_scope'>scope</span> <span class='op'>|</span>
         <span class='id identifier rubyid_scope'>scope</span><span class='period'>.</span><span class='id identifier rubyid_where'>where</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>timestamp &lt; ?</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='int'>1</span><span class='period'>.</span><span class='id identifier rubyid_month'>month</span><span class='period'>.</span><span class='id identifier rubyid_ago'>ago</span><span class='rparen'>)</span>
     <span class='kw'>end</span>
@@ -110,19 +117,19 @@ evaluating the timestamp for the purge.</p>
 
 <p>To execute the purge, do:</p>
 
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_r'>r</span><span class='period'>.</span><span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
+<pre class="code ruby"><code class="ruby">    <span class='id identifier rubyid_count'>count</span> <span class='op'>=</span> <span class='id identifier rubyid_r'>r</span><span class='period'>.</span><span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
     <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Deleted </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_count'>count</span><span class='embexpr_end'>}</span><span class='tstring_content'> rows</span><span class='tstring_end'>&quot;</span></span>
 </code></pre>
 
 <p>Check what it will do:</p>
 
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_r'>r</span><span class='period'>.</span><span class='id identifier rubyid_print_queries'>print_queries</span><span class='lparen'>(</span><span class='gvar'>$stdout</span><span class='rparen'>)</span>
+<pre class="code ruby"><code class="ruby">    <span class='id identifier rubyid_r'>r</span><span class='period'>.</span><span class='id identifier rubyid_print_queries'>print_queries</span><span class='lparen'>(</span><span class='gvar'>$stdout</span><span class='rparen'>)</span>
 </code></pre>
 
 <p>This will show you what it will do by printing out the three different
 statements used:</p>
 
-<pre class="code ruby"><code class="ruby">Initial Query:
+<pre class="code sql"><code class="sql">    Initial Query:
         SELECT  `id`,`account`,`timestamp`
         FROM `comments` FORCE INDEX(comments_on_account_timestamp)
         WHERE (timestamp &lt; &#39;2014-11-25 21:47:43&#39;)
@@ -131,24 +138,26 @@ statements used:</p>
     Chunk Query:
         SELECT  `id`,`account`,`timestamp`
         FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-        WHERE (timestamp &lt; &#39;2014-11-25 21:47:43&#39;) AND (`account` &gt; 0 OR (`account` = 0 AND `timestamp` &gt; &#39;2014-11-18 21:47:43&#39;))\n    ORDER BY `account` ASC,`timestamp` ASC
+        WHERE (timestamp &lt; &#39;2014-11-25 21:47:43&#39;) AND (`account` &gt; 0 OR (`account` = 0 AND `timestamp` &gt; &#39;2014-11-18 21:47:43&#39;))
+    ORDER BY `account` ASC,`timestamp` ASC
         LIMIT 500
     Delete Statement:
         DELETE
         FROM `comments`
-        WHERE (`id` = 2)</code></pre>
+        WHERE (`id` = 2)
+</code></pre>
 
-<p>It does the initial statement once to get the first chunk of rows. Then it
-does subsequent queries starting at the index where the last chunk left
-off, thereby avoiding a complete index scan. This works fine as long as you
-don&#39;t have rows with duplicate account id and timestamps. If you do,
-you&#39;ll possibly miss rows between chunks.</p>
+<p>It does the initial statement once to get the first chunk of rows.
+Then it does subsequent queries starting at the index where the last
+chunk left off, thereby avoiding a complete index scan.  This works
+fine as long as you don't have rows with duplicate account id and
+timestamps.  If you do, you'll possibly miss rows between chunks.</p>
 
 <p>To avoid missing duplicates, you can traverse the index using only the
-first column with an inclusive comparator like <code>&gt;=</code> instead
-of <code>&gt;</code>. Here&#39;s what that would look like:</p>
+first column with an inclusive comparator like <code>&gt;=</code> instead of <code>&gt;</code>.
+Here's what that would look like:</p>
 
-<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_r'>r</span> <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='label'>model:</span><span class='const'>Comment</span><span class='comma'>,</span>
+<pre class="code ruby"><code class="ruby">    <span class='id identifier rubyid_r'>r</span> <span class='op'>=</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='label'>model:</span><span class='const'>Comment</span><span class='comma'>,</span>
                                     <span class='label'>index:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>comments_on_account_timestamp</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
                                     <span class='label'>first_only:</span> <span class='kw'>true</span> <span class='kw'>do</span> <span class='op'>|</span> <span class='id identifier rubyid_scope'>scope</span> <span class='op'>|</span>
         <span class='id identifier rubyid_scope'>scope</span><span class='period'>.</span><span class='id identifier rubyid_where'>where</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>timestamp &lt; ?</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='int'>1</span><span class='period'>.</span><span class='id identifier rubyid_month'>month</span><span class='period'>.</span><span class='id identifier rubyid_ago'>ago</span><span class='rparen'>)</span>
@@ -157,26 +166,27 @@ of <code>&gt;</code>. Here&#39;s what that would look like:</p>
 
 <p>The chunk query looks like:</p>
 
-<pre class="code ruby"><code class="ruby">SELECT  `id`,`account`,`timestamp`
+<pre class="code sql"><code class="sql">    SELECT  `id`,`account`,`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
     WHERE (timestamp &lt; &#39;2014-11-25 21:47:43&#39;) AND (`account` &gt;= 0)
-    LIMIT 500</code></pre>
+    LIMIT 500
+</code></pre>
 
-<p>You can scan the index in either direction. To specify descending order,
-use the <code>reverse: true</code> option.</p>
+<p>You can scan the index in either direction.  To specify descending
+order, use the <code>reverse: true</code> option.</p>
 
-<h3 id="label-Copying+rows+from+one+table+to+another">Copying rows from one table to another</h3>
+<h3>Copying rows from one table to another</h3>
 
 <p>You can use the same technique to copy rows from one table to another.
-Support in CleanSweep is pretty minimal. It won&#39;t <em>move</em> rows,
-only copy them, although it would be easy to fix this. I used this to copy
+Support in CleanSweep is pretty minimal.  It won't <em>move</em> rows, only
+copy them, although it would be easy to fix this.  I used this to copy
 ids into a temporary table which I then used to delete later.</p>
 
-<p>Here&#39;s an example that copies rows from the <code>Comment</code> model
-to the <code>ExpiredComment</code> model (<code>expired_comments</code>).
-Comments older than one week are copied.</p>
+<p>Here's an example that copies rows from the <code>Comment</code> model to the
+<code>ExpiredComment</code> model (<code>expired_comments</code>).  Comments older than one
+week are copied.</p>
 
-<pre class="code ruby"><code class="ruby">copier = CleanSweep::PurgeRunner.new model: Comment,
+<pre class="code ruby"><code class="ruby">      copier = CleanSweep::PurgeRunner.new model: Comment,
                                            index: &#39;comments_on_account_timestamp&#39;,
                                            dest_model: ExpiredComment,
                                            copy_only: true,
@@ -185,119 +195,165 @@ Comments older than one week are copied.</p>
       end
 </code></pre>
 
-<p>The <code>copy_columns</code> option specifies additional columns to be
-inserted into the <code>expired_comments</code> table.</p>
+<p>The <code>copy_columns</code> option specifies additional columns to be inserted
+into the <code>expired_comments</code> table.</p>
 
 <p>If the column names are different in the destination table than in the
-source table, you can specify a mapping with the <code>dest_columns</code>
-option which takes a map of source column name to destination name.</p>
+source table, you can specify a mapping with the <code>dest_columns</code> option
+which takes a map of source column name to destination name.</p>
 
-<h3 id="label-Deleting+rows+in+another+table">Deleting rows in another table</h3>
+<h3>Deleting rows in another table</h3>
 
-<p>What if you want to query one table and delete those rows in another? I
-needed this when I built a temporary table of account ids that referenced
-deleted accounts. I then wanted to delete rows in other tables that
-referenced those account ids. To do that, specify a <code>dest_table</code>
-without specifying <code>copy_only</code> mode. This will execute the
-delete statement on the destination table without removing rows from the
-source table.</p>
+<p>What if you want to query one table and delete those rows in another?
+I needed this when I built a temporary table of account ids that
+referenced deleted accounts.  I then wanted to delete rows in other
+tables that referenced those account ids.  To do that, specify a
+<code>dest_table</code> without specifying <code>copy_only</code> mode.  This will execute
+the delete statement on the destination table without removing rows
+from the source table.</p>
 
-<h3 id="label-Watching+the+history+list+and+replication+lag">Watching the history list and replication lag</h3>
+<p>Here's an example:</p>
 
-<p>You can enter thresholds for the history list size and replication lag that
-will be used to pause the purge if either of those values get into an
-unsafe territory. The script will pause for 5 minutes and only start once
-the corresponding metric goes back down to 90% of the specified threshold.</p>
+<pre class="code sql"><code class="sql">      create temporary table expired_metrics (
+           metric_id int,
+           account_id int,
+           primary key (account_id, metric_id)
+      EOF
+</code></pre>
 
-<h3 id="label-Logging+and+monitoring+progress">Logging and monitoring progress</h3>
+<p>Then run a job to pull account_id, metric_id into the expired metrics table:</p>
 
-<p>You pass in a standard log instance to capture all running output. By
-default it will log to your <code>ActiveRecord::Base</code> logger, or
-stdout if that&#39;s not set up.</p>
+<pre class="code ruby"><code class="ruby">copier = CleanSweep::PurgeRunner.new index: &#39;index_on_metric_account_id&#39;,
+                                     model: AccountMetric,
+                                     dest_model: ExpiredMetric,
+                                     copy_only: true) do | model |
+    model.where(&quot;last_used_at &lt; ?)&quot;, expiration_date)
+end
+copier.execute_in_batches
+</code></pre>
 
-<p>If you specify a reporting interval with the <code>report</code> option it
-will print the status of the purge at that interval. This is useful to
+<p>Now create as many jobs as you need for the tables which refer to these metrics:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>model:</span> <span class='const'>ExpiredMetric</span><span class='comma'>,</span>
+                            <span class='label'>index:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>PRIMARY</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+                            <span class='label'>dest_model:</span> <span class='const'>Metric</span><span class='comma'>,</span>
+                            <span class='label'>dest_columns:</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>metric_id</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>id</span><span class='tstring_end'>&#39;</span></span><span class='rbrace'>}</span> <span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
+
+<span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>model:</span> <span class='const'>ExpiredMetric</span><span class='comma'>,</span>
+                            <span class='label'>index:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>PRIMARY</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+                            <span class='label'>dest_model:</span> <span class='const'>ChartMetric</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
+
+<span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>PurgeRunner</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>model:</span> <span class='const'>ExpiredMetric</span><span class='comma'>,</span>
+                            <span class='label'>index:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>PRIMARY</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+                            <span class='label'>dest_model:</span> <span class='const'>SystemMetric</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_execute_in_batches'>execute_in_batches</span>
+</code></pre>
+
+<p>These will delete the expired metrics from all the tables that refer to them.</p>
+
+<h3>Watching the history list and replication lag</h3>
+
+<p>You can enter thresholds for the history list size and replication lag
+that will be used to pause the purge if either of those values get
+into an unsafe territory.  The script will pause for 5 minutes and
+only start once the corresponding metric goes back down to 90% of the
+specified threshold.</p>
+
+<h3>Logging and monitoring progress</h3>
+
+<p>You pass in a standard log instance to capture all running output.  By
+default it will log to your <code>ActiveRecord::Base</code> logger, or stdout if
+that's not set up.</p>
+
+<p>If you specify a reporting interval with the <code>report</code> option it will
+print the status of the purge at that interval.  This is useful to
 track progress and assess the rate of deletion.</p>
 
-<h3 id="label-Joins+and+subqueries">Joins and subqueries</h3>
+<h3>Joins and subqueries</h3>
 
-<p>You can add subqueries and joins to your query in the scope block, but be
-careful. The index and order clause may work against you if the table you
-are joining with doesn&#39;t have good parity with the indexes in your
-target table.</p>
+<p>You can add subqueries and joins to your query in the scope block, but
+be careful.  The index and order clause may work against you if the
+table you are joining with doesn't have good parity with the indexes
+in your target table.</p>
 
-<h3 id="label-Limitations">Limitations</h3>
-<ul><li>
-<p>Only works for mysql (as far as I know). I have only used it against 5.5.</p>
-</li><li>
-<p>Should work with ActiveRecord 3.* - 4.*.</p>
-</li><li>
-<p>Using a non-unique index risks missing duplicate rows unless you use the
-<code>first_only</code> option.</p>
-</li><li>
-<p>Using the <code>first_only</code> option risks rescanning many rows if you
-have many more duplicates than your  chunk size</p>
-</li><li>
-<p>An index is required but you should be able to run a purge without one. It
-just means you&#39;re not  scanning the index in chunks. This might be okay
-if you are deleting everything as you go along because  then you&#39;re not
-rescanning the rows. It wouldn&#39;t require much to modify CleanSweep to
-support this  mode.</p>
-</li></ul>
+<h3>Limitations</h3>
 
-<h3 id="label-Other+options">Other options</h3>
+<ul>
+<li>Only works for mysql (as far as I know).  I have only used it against 5.5.</li>
+<li>Should work with ActiveRecord 3.<em> - 4.</em>.</li>
+<li>Using a non-unique index risks missing duplicate rows unless you use the <code>first_only</code> option.</li>
+<li>Using the <code>first_only</code> option risks rescanning many rows if you have many more duplicates than your
+chunk size</li>
+<li>An index is required but you should be able to run a purge without one.  It just means you're not
+scanning the index in chunks.  This might be okay if you are deleting everything as you go along because
+then you're not rescanning the rows.  It wouldn't require much to modify CleanSweep to support this
+mode.</li>
+</ul>
 
-<p>There are a number of other options you can use to tune the script. For
-details look at the <a
-href="http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html">API
-on the PurgeRunner class</a></p>
 
-<h3 id="label-NewRelic+integration">NewRelic integration</h3>
+<h3>Other options</h3>
 
-<p>The script requires the <a href="http://github.com/newrelic/rpm">New
-Relic</a> gem. It won&#39;t impact anyting if you don&#39;t have a New
-Relic account to report to, but if you do use New Relic it is configured to
-show you detailed metrics. I recommend turning off transaction traces for
-long purge jobs to reduce your memory footprint.</p>
+<p>There are a number of other options you can use to tune the script.
+For details look at the <a href="http://bkayser.github.io/cleansweep/rdoc/CleanSweep/PurgeRunner.html">API on the <code>PurgeRunner</code>
+class</a></p>
 
-<h2 id="label-Testing">Testing</h2>
+<h3>New Relic integration</h3>
 
-<p>To run the specs, start a local mysql instance. The default user is root
-with an empty password. Override the user/password with environment
-variables <code>DB_USER</code> and <code>DB_PASSWORD</code>. The test
-creates a db called &#39;cstest&#39;.</p>
+<p>The script requires the <a href="http://github.com/newrelic/rpm">New Relic</a>
+gem.  It won't impact anyting if you don't have a New Relic account to
+report to, but if you do use New Relic it is configured to show you
+detailed metrics.</p>
 
-<h2 id="label-Contributing">Contributing</h2>
-<ol><li>
-<p>Fork it ( <a
-href="https://github.com/bkayser/cleansweep/fork">github.com/bkayser/cleansweep/fork</a>
-)</p>
-</li><li>
-<p>Create your feature branch (<code>git checkout -b my-new-feature</code>)</p>
-</li><li>
-<p>Commit your changes (<code>git commit -am &#39;Add some
-feature&#39;</code>)</p>
-</li><li>
-<p>Push to the branch (<code>git push origin my-new-feature</code>)</p>
-</li><li>
-<p>Create a new Pull Request</p>
-</li></ol>
+<p>In order to see the data in New Relic your purge must be identified as
+a background transaction.  If you are running in Resque or DelayedJob,
+it will automatically be tagged as such, but if you are just invoking
+your purge directly, you'll need to tag it as a background
+transaction.  The easy way to do that is shown in this example:</p>
 
-<h2 id="label-License+and+Copyright">License and Copyright</h2>
+<pre class="code ruby"><code class="ruby">    class Purge
+      include NewRelic::Agent::Instrumentation::ControllerInstrumentation
+      def run()
+         ...
+      end
+      add_transaction_tracer :run
+    end
+</code></pre>
+
+<p>Also, I recommend turning off transaction traces for long
+purge jobs to reduce your memory footprint.</p>
+
+<h2>Testing</h2>
+
+<p>To run the specs, start a local mysql instance.  The default user is
+root with an empty password.  Override the user/password with
+environment variables <code>DB_USER</code> and <code>DB_PASSWORD</code>.  The test creates a
+db called 'cstest'.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork it ( <a href="https://github.com/bkayser/cleansweep/fork">https://github.com/bkayser/cleansweep/fork</a> )</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create a new Pull Request</li>
+</ol>
+
+
+<h2>License and Copyright</h2>
 
 <p>Copyright 2014 New Relic, Inc., and Bill Kayser</p>
 
 <p>Covered by the MIT <a href="LICENSE.txt">LICENSE</a>.</p>
 
-<h3 id="label-Credits">Credits</h3>
+<h3>Credits</h3>
 
-<p>This was all inspired and informed by <a
-href="http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html">Percona’s
-pt-archiver script</a> written by Baron Schwartz.</p>
+<p>This was all inspired and informed by <a href="http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html">Percona's <code>pt-archiver</code>
+script</a>
+written by Baron Schwartz.</p>
 </div></div>
 
     <div id="footer">
-  Generated on Tue Dec  2 22:29:30 2014 by
+  Generated on Wed Dec 17 09:21:50 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.4).
 </div>

@@ -73,12 +73,10 @@
   
     <dt class="r1">Inherits:</dt>
     <dd class="r1">
-      <span class="inheritName">Struct</span>
+      <span class="inheritName">Object</span>
       
         <ul class="fullTree">
           <li>Object</li>
-          
-            <li class="next">Struct</li>
           
             <li class="next">CleanSweep::TableSchema::IndexSchema</li>
           
@@ -335,7 +333,7 @@ not present.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">- (IndexSchema) <strong>initialize</strong>(name, model) </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (IndexSchema) <strong>initialize</strong>(name, model, unique = false) </a>
     
 
     
@@ -402,17 +400,38 @@ not present.</p>
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#unique%3F-instance_method" title="#unique? (instance method)">- (Boolean) <strong>unique?</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
     </ul>
   
 
-
-  <div id="constructor_details" class="method_details_list">
+<div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    - (<tt><span class='object_link'><a href="" title="CleanSweep::TableSchema::IndexSchema (class)">IndexSchema</a></span></tt>) <strong>initialize</strong>(name, model) 
+    - (<tt><span class='object_link'><a href="" title="CleanSweep::TableSchema::IndexSchema (class)">IndexSchema</a></span></tt>) <strong>initialize</strong>(name, model, unique = false) 
   
 
   
@@ -439,15 +458,17 @@ not present.</p>
 6
 7
 8
-9</pre>
+9
+10</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 5</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span> <span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span> <span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_unique'>unique</span> <span class='op'>=</span> <span class='kw'>false</span>
   <span class='ivar'>@model</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span>
   <span class='ivar'>@columns</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
   <span class='ivar'>@name</span> <span class='op'>=</span> <span class='id identifier rubyid_name'>name</span>
+  <span class='ivar'>@unique</span> <span class='op'>=</span> <span class='id identifier rubyid_unique'>unique</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -480,24 +501,6 @@ not present.</p>
 </div>
 <div class="tags">
   
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Object</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the current value of ascending</p>
-</div>
-      
-    </li>
-  
-</ul>
 
 </div><table class="source_code">
   <tr>
@@ -505,12 +508,12 @@ not present.</p>
       <pre class="lines">
 
 
-1
-2
-3</pre>
+3
+4
+5</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 1</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 3</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_ascending'>ascending</span>
   <span class='ivar'>@ascending</span>
@@ -670,24 +673,6 @@ not present.</p>
 </div>
 <div class="tags">
   
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Object</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the current value of model</p>
-</div>
-      
-    </li>
-  
-</ul>
 
 </div><table class="source_code">
   <tr>
@@ -695,12 +680,12 @@ not present.</p>
       <pre class="lines">
 
 
-1
-2
-3</pre>
+3
+4
+5</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 1</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 3</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_model'>model</span>
   <span class='ivar'>@model</span>
@@ -731,24 +716,6 @@ not present.</p>
 </div>
 <div class="tags">
   
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Object</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>the current value of name</p>
-</div>
-      
-    </li>
-  
-</ul>
 
 </div><table class="source_code">
   <tr>
@@ -756,12 +723,12 @@ not present.</p>
       <pre class="lines">
 
 
-1
-2
-3</pre>
+3
+4
+5</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 1</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 3</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_name'>name</span>
   <span class='ivar'>@name</span>
@@ -804,12 +771,12 @@ not present.</p>
       <pre class="lines">
 
 
-12
 13
-14</pre>
+14
+15</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 12</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 13</span>
 
 <span class='kw'>def</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_col_name'>col_name</span>
   <span class='ivar'>@columns</span> <span class='op'>&lt;&lt;</span> <span class='const'>CleanSweep</span><span class='op'>::</span><span class='const'>TableSchema</span><span class='op'>::</span><span class='const'>ColumnSchema</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_col_name'>col_name</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
@@ -848,19 +815,19 @@ be where they are located in a row of values passed in later to
       <pre class="lines">
 
 
-19
-20
-21
-22
-23
 24
 25
 26
 27
-28</pre>
+28
+29
+30
+31
+32
+33</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_add_columns_to'>add_columns_to</span> <span class='id identifier rubyid_columns'>columns</span>
   <span class='ivar'>@columns</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span> <span class='id identifier rubyid_column'>column</span> <span class='op'>|</span>
@@ -892,17 +859,17 @@ be where they are located in a row of values passed in later to
       <pre class="lines">
 
 
-30
-31
-32
-33
-34
 35
 36
-37</pre>
+37
+38
+39
+40
+41
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 30</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 35</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_order'>order</span><span class='lparen'>(</span><span class='id identifier rubyid_scope'>scope</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_direction'>direction</span> <span class='op'>=</span> <span class='id identifier rubyid_ascending'>ascending</span> <span class='op'>?</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ASC</span><span class='tstring_end'>&#39;</span></span> <span class='op'>:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>DESC</span><span class='tstring_end'>&#39;</span></span>
@@ -932,20 +899,20 @@ be where they are located in a row of values passed in later to
       <pre class="lines">
 
 
-39
-40
-41
-42
-43
 44
 45
 46
 47
 48
-49</pre>
+49
+50
+51
+52
+53
+54</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 39</span>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_scope_to_next_chunk'>scope_to_next_chunk</span><span class='lparen'>(</span><span class='id identifier rubyid_scope'>scope</span><span class='comma'>,</span> <span class='id identifier rubyid_last_row'>last_row</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_query_args'>query_args</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
@@ -963,12 +930,64 @@ be where they are located in a row of values passed in later to
 </table>
 </div>
     
+      <div class="method_details ">
+  <h3 class="signature " id="unique?-instance_method">
+  
+    - (<tt>Boolean</tt>) <strong>unique?</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+17
+18
+19</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/clean_sweep/table_schema/index_schema.rb', line 17</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_unique?'>unique?</span>
+  <span class='ivar'>@unique</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 </div>
 
     <div id="footer">
-  Generated on Tue Dec  2 22:29:31 2014 by
+  Generated on Wed Dec 17 09:21:51 2014 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.4).
 </div>
