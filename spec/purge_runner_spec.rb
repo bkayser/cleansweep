@@ -6,7 +6,7 @@ describe CleanSweep::PurgeRunner do
   context 'PurgeRunner' do
     include ActiveSupport::Testing::TimeHelpers
     before do
-      travel_to Time.parse("2014-12-02 13:47:43 -0800")
+      travel_to Time.parse("2014-12-02 13:47:43.000000 -0800")
     end
     after do
       travel_back
@@ -68,19 +68,18 @@ describe CleanSweep::PurgeRunner do
                                                index: 'comments_on_account_timestamp'  do | scope |
             scope.where('timestamp < ?', 1.week.ago)
           end
-          output = StringIO.new
-          purger.print_queries(output)
-          expect(output.string).to eq <<EOF
+          output = purger.print_queries
+          expect(output).to eq <<EOF
 Initial Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43')
+    WHERE (timestamp < '2014-11-25 21:47:43.000000')
     ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Chunk Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43') AND (`comments`.`account` > 0 OR (`comments`.`account` = 0 AND `comments`.`timestamp` > '2014-11-18 21:47:43'))\n    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
+    WHERE (timestamp < '2014-11-25 21:47:43.000000') AND (`comments`.`account` > 0 OR (`comments`.`account` = 0 AND `comments`.`timestamp` > '2014-11-18 21:47:43.000000'))\n    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Delete Statement:
     DELETE

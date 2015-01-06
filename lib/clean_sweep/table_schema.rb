@@ -14,8 +14,8 @@ class CleanSweep::TableSchema
 
   def initialize(model, options={})
 
-    traversing_key_name  = options[:key_name]
-    ascending            = options.include?(:ascending) ? options[:ascending] : true
+    traversing_key_name  = options[:index]
+    ascending            = !options[:reverse]
     first_only           = options[:first_only]
     @model               = model
     @dest_model          = options[:dest_model] || @model
@@ -26,7 +26,7 @@ class CleanSweep::TableSchema
     @name                = @model.table_name
 
     @columns      =
-      (options[:extra_columns] || []).map do | extra_col_name |
+      (options[:copy_columns] || []).map do | extra_col_name |
         CleanSweep::TableSchema::ColumnSchema.new extra_col_name, model
       end
 
@@ -38,11 +38,15 @@ class CleanSweep::TableSchema
     raise "Table #{model.table_name} must have a primary key" unless @primary_key
 
     @primary_key.add_columns_to @columns
-    if traversing_key_name
-      traversing_key_name.downcase!
-      raise "BTREE Index #{traversing_key_name} not found in #@name" unless key_schemas.include? traversing_key_name
-      @traversing_key = key_schemas[traversing_key_name]
-      @traversing_key.add_columns_to @columns
+    if !options[:non_traversing]
+      if traversing_key_name
+        traversing_key_name.downcase!
+        raise "BTREE Index #{traversing_key_name} not found in #@name" unless key_schemas.include? traversing_key_name
+        @traversing_key = key_schemas[traversing_key_name]
+        @traversing_key.add_columns_to @columns
+      else
+        @traversing_key = @primary_key
+      end
       @traversing_key.ascending = ascending
       @traversing_key.first_only = first_only
     end
@@ -74,7 +78,7 @@ class CleanSweep::TableSchema
   end
 
   def initial_scope
-    scope = @model.all.select(quoted_column_names).from(from_clause)
+    scope = @model.select(quoted_column_names).from(from_clause)
     scope = @traversing_key.order(scope) if @traversing_key
     return scope
   end

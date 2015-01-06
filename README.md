@@ -116,6 +116,9 @@ The chunk query looks like:
 You can scan the index in either direction.  To specify descending
 order, use the `reverse: true` option.
 
+If no index is specified, it will pick the primary key or the first unique index if there
+is no primary key.
+
 ### Copying rows from one table to another
 
 You can use the same technique to copy rows from one table to another.
@@ -179,16 +182,13 @@ Now create as many jobs as you need for the tables which refer to these metrics:
 
 ```ruby
 CleanSweep::PurgeRunner.new(model: ExpiredMetric,
-                            index: 'PRIMARY',
                             dest_model: Metric,
                             dest_columns: { 'metric_id' => 'id'} ).execute_in_batches
 
 CleanSweep::PurgeRunner.new(model: ExpiredMetric,
-                            index: 'PRIMARY',
                             dest_model: ChartMetric).execute_in_batches
 
 CleanSweep::PurgeRunner.new(model: ExpiredMetric,
-                            index: 'PRIMARY',
                             dest_model: SystemMetric).execute_in_batches
 ```
 
@@ -201,6 +201,10 @@ that will be used to pause the purge if either of those values get
 into an unsafe territory.  The script will pause for 5 minutes and
 only start once the corresponding metric goes back down to 90% of the
 specified threshold.
+
+Note: You will need process privileges to be able to see the history list and
+replication client privileges to monitor the replication lag.
+
 
 ### Logging and monitoring progress
 
@@ -221,8 +225,8 @@ in your target table.
 
 ### Limitations
 
-* Only works for mysql (as far as I know).  I have only used it against 5.5.
-* Should work with ActiveRecord 3.* - 4.*.
+* Only works for mysql.  I have only used it against 5.5.
+* Should work with ActiveRecord 3.* - 4.*.  The tests only work on 4.*.
 * Using a non-unique index risks missing duplicate rows unless you use the `first_only` option.
 * Using the `first_only` option risks rescanning many rows if you have many more duplicates than your
   chunk size

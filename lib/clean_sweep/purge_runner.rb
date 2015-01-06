@@ -16,14 +16,23 @@ require 'stringio'
 #    The number of rows to copy in each block.  Defaults to 500.
 # [:index]
 #    The index to traverse in ascending order doing the purge.  Rows are read in the order of
-#    the index, which must be a btree index.  If not specified, <tt>PRIMARY</tt> is assumed.
+#    the index, which must be a btree index.  If not specified, An index is chosen automatically
+#    in order of preference: 
+#    1. PRIMARY KEY
+#    2. First UNIQUE index
+#    3. First non-UNIQUE index
+#    4. No index used if no indexes defined.
+# [:non_traversing]
+#    When true, specifies the table will not be traversed using an index.
+#    This only makes sense if you are deleting everything as you go along, otherwise you'll
+#    be re-scanning skipped rows.
 # [:reverse]
 #    Traverse the index in reverse order.  For example, if your index is on <tt>account_id</tt>,
 #    <tt>timestamp</tt>, this option will move through the rows starting at the highest account
 #    number, then move through timestamps starting with the most recent.
 # [:first_only]
-#    Traverse only the first column of the index, and do so inclusively using the <tt>&gt;=</tt> operator
-#    instead of the strict <tt>&gt;</tt> operator.  This is important if the index is not unique and there
+#    Traverse only the first column of the index, and do so inclusively using the <tt>'>='</tt> operator
+#    instead of the strict <tt>'>'</tt> operator.  This is important if the index is not unique and there
 #    are a lot of duplicates.  Otherwise the delete could miss rows.  Not allowed in copy mode because you'd
 #    be inserting duplicate rows.
 # [:dry_run]
@@ -94,11 +103,12 @@ class CleanSweep::PurgeRunner
     @copy_mode        = @target_model && options[:copy_only]
 
     @table_schema     = CleanSweep::TableSchema.new @model,
-                                                    key_name: options[:index],
-                                                    ascending: !options[:reverse],
-                                                    extra_columns: options[:copy_columns],
+                                                    non_traversing: options[:non_traversing],
+                                                    index: options[:index],
+                                                    reverse: options[:reverse],
+                                                    copy_columns: options[:copy_columns],
                                                     first_only: options[:first_only],
-                                                    dest_model: @target_model,
+                                                    dest_model: options[:dest_model],
                                                     dest_columns: options[:dest_columns]
 
     if (@max_history || @max_repl_lag)
@@ -134,7 +144,7 @@ class CleanSweep::PurgeRunner
   def execute_in_batches
 
     if @dry_run
-      print_queries($stdout)
+      log :info, print_queries
       return 0
     end
 
@@ -205,7 +215,8 @@ class CleanSweep::PurgeRunner
   add_method_tracer :sleep
   add_method_tracer :execute_in_batches
 
-  def print_queries(io)
+  def print_queries
+    io = StringIO.new
     io.puts 'Initial Query:'
     io.puts format_query('    ', @query.to_sql)
     rows = @model.connection.select_rows @query.limit(1).to_sql
@@ -223,6 +234,7 @@ class CleanSweep::PurgeRunner
       io.puts "Delete Statement:"
       io.puts format_query('    ', @table_schema.delete_statement(rows))
     end
+    io.string
   end
 
   private
