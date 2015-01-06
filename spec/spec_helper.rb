@@ -10,8 +10,6 @@ require 'mysql2'
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.formatter = :progress
-  #config.order = 'random'
-
   config.before(:suite) do
     FactoryGirl.find_definitions
   end
@@ -22,7 +20,7 @@ logdir = File.expand_path "../../log",__FILE__
 FileUtils.mkdir_p logdir
 logfile = File.open(File.join(logdir, "test.log"), "w+")
 ActiveRecord::Base.logger = Logger.new(logfile)
-
+Time.zone = 'America/Los_Angeles'
 database = { 
   encoding: 'utf8',
   adapter: 'mysql2',
