@@ -35,6 +35,10 @@
 efficient, low-impact manner on mysql innodb tables.  Based on the
 Percona <code>pt-archive</code> utility.</p>
 
+<p><a href="https://travis-ci.org/bkayser/cleansweep"><img src="https://img.shields.io/travis/bkayser/cleansweep/master.svg?x=3" alt="Build Status"></a>
+<a href="https://codeclimate.com/github/bkayser/cleansweep"><img src="https://codeclimate.com/github/bkayser/cleansweep/badges/gpa.svg?x=3" alt="Code Climate"></a>
+<a href="https://codeclimate.com/github/bkayser/cleansweep"><img src="https://codeclimate.com/github/bkayser/cleansweep/badges/coverage.svg?x=3" alt="Test Coverage"></a></p>
+
 <h2>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
@@ -141,6 +145,9 @@ Here's what that would look like:</p>
 <p>You can scan the index in either direction.  To specify descending
 order, use the <code>reverse: true</code> option.</p>
 
+<p>If no index is specified, it will pick the primary key or the first unique index if there
+is no primary key.</p>
+
 <h3>
 <a id="copying-rows-from-one-table-to-another" class="anchor" href="#copying-rows-from-one-table-to-another" aria-hidden="true"><span class="octicon octicon-link"></span></a>Copying rows from one table to another</h3>
 
@@ -200,16 +207,13 @@ copier.execute_in_batches</pre></div>
 <p>Now create as many jobs as you need for the tables which refer to these metrics:</p>
 
 <div class="highlight highlight-ruby"><pre><span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
-                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
                             <span class="pl-c1">dest_model:</span> <span class="pl-vo">Metric</span>,
                             <span class="pl-c1">dest_columns:</span> { <span class="pl-s1"><span class="pl-pds">'</span>metric_id<span class="pl-pds">'</span></span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span>} ).execute_in_batches
 
 <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
-                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
                             <span class="pl-c1">dest_model:</span> <span class="pl-vo">ChartMetric</span>).execute_in_batches
 
 <span class="pl-s3">CleanSweep</span>::<span class="pl-s3">PurgeRunner</span>.<span class="pl-k">new</span>(<span class="pl-c1">model:</span> <span class="pl-vo">ExpiredMetric</span>,
-                            <span class="pl-c1">index:</span> <span class="pl-s1"><span class="pl-pds">'</span>PRIMARY<span class="pl-pds">'</span></span>,
                             <span class="pl-c1">dest_model:</span> <span class="pl-vo">SystemMetric</span>).execute_in_batches</pre></div>
 
 <p>These will delete the expired metrics from all the tables that refer to them.</p>
@@ -222,6 +226,9 @@ that will be used to pause the purge if either of those values get
 into an unsafe territory.  The script will pause for 5 minutes and
 only start once the corresponding metric goes back down to 90% of the
 specified threshold.</p>
+
+<p>Note: You will need process privileges to be able to see the history list and
+replication client privileges to monitor the replication lag.</p>
 
 <h3>
 <a id="logging-and-monitoring-progress" class="anchor" href="#logging-and-monitoring-progress" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging and monitoring progress</h3>
@@ -246,8 +253,8 @@ in your target table.</p>
 <a id="limitations" class="anchor" href="#limitations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Limitations</h3>
 
 <ul>
-<li>Only works for mysql (as far as I know).  I have only used it against 5.5.</li>
-<li>Should work with ActiveRecord 3.* - 4.*.</li>
+<li>Only works for mysql.  I have only used it against 5.5.</li>
+<li>Tested with ActiveRecord 3.1.* - 4.0.*.</li>
 <li>Using a non-unique index risks missing duplicate rows unless you use the <code>first_only</code> option.</li>
 <li>Using the <code>first_only</code> option risks rescanning many rows if you have many more duplicates than your
 chunk size</li>
@@ -311,12 +318,12 @@ db called 'cstest'.</p>
 <h2>
 <a id="license-and-copyright" class="anchor" href="#license-and-copyright" aria-hidden="true"><span class="octicon octicon-link"></span></a>License and Copyright</h2>
 
-<p>Copyright 2014 New Relic, Inc., and Bill Kayser</p>
+<p>Copyright 2014-2015 New Relic, Inc., and Bill Kayser</p>
 
 <p>Covered by the MIT <a href="LICENSE.txt">LICENSE</a>.</p>
 
-<h3>
-<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h3>
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
 
 <p>This was all inspired and informed by <a href="http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html">Percona's <code>pt-archiver</code>
 script</a>
