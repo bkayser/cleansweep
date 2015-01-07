@@ -2,6 +2,10 @@ Cleansweep is a utility for scripting purges using ruby in an
 efficient, low-impact manner on mysql innodb tables.  Based on the
 Percona `pt-archive` utility.
 
+[![Build Status](https://img.shields.io/travis/bkayser/cleansweep/master.svg)](https://travis-ci.org/bkayser/cleansweep)
+[![Code Climate](https://codeclimate.com/github/bkayser/cleansweep/badges/gpa.svg)](https://codeclimate.com/github/bkayser/cleansweep)
+[![Test Coverage](https://codeclimate.com/github/bkayser/cleansweep/badges/coverage.svg)](https://codeclimate.com/github/bkayser/cleansweep)
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -283,11 +287,11 @@ db called 'cstest'.
 
 ## License and Copyright
 
-Copyright 2014 New Relic, Inc., and Bill Kayser
+Copyright 2014-2015 New Relic, Inc., and Bill Kayser
 
 Covered by the MIT [LICENSE](LICENSE.txt).
 
-### Credits
+## Credits
 
 This was all inspired and informed by [Percona's `pt-archiver`
 script](http://www.percona.com/doc/percona-toolkit/2.1/pt-archiver.html)
