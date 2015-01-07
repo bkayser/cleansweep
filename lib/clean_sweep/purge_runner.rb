@@ -215,28 +215,6 @@ class CleanSweep::PurgeRunner
   add_method_tracer :sleep
   add_method_tracer :execute_in_batches
 
-  def print_queries
-    io = StringIO.new
-    io.puts 'Initial Query:'
-    io.puts format_query('    ', @query.to_sql)
-    rows = @model.connection.select_rows @query.limit(1).to_sql
-    if rows.empty?
-      # Don't have any sample data to use for the sample queries, so use NULL values just
-      # so the query will print out.
-      rows << [nil] * 100
-    end
-    io.puts "Chunk Query:"
-    io.puts format_query('    ', @table_schema.scope_to_next_chunk(@query, rows.first).to_sql)
-    if copy_mode?
-      io.puts "Insert Statement:"
-      io.puts format_query('    ', @table_schema.insert_statement(rows))
-    else
-      io.puts "Delete Statement:"
-      io.puts format_query('    ', @table_schema.delete_statement(rows))
-    end
-    io.string
-  end
-
   private
 
   def format_query indentation, query

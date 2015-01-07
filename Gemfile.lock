@@ -79,4 +79,4 @@ DEPENDENCIES
   pry (~> 0)
   rake (~> 10.0)
   rspec (~> 3.1)
-  timecop
+  timecop (~> 0.7.1)

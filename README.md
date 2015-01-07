@@ -2,9 +2,9 @@ Cleansweep is a utility for scripting purges using ruby in an
 efficient, low-impact manner on mysql innodb tables.  Based on the
 Percona `pt-archive` utility.
 
-[![Build Status](https://img.shields.io/travis/bkayser/cleansweep/master.svg)](https://travis-ci.org/bkayser/cleansweep)
-[![Code Climate](https://codeclimate.com/github/bkayser/cleansweep/badges/gpa.svg)](https://codeclimate.com/github/bkayser/cleansweep)
-[![Test Coverage](https://codeclimate.com/github/bkayser/cleansweep/badges/coverage.svg)](https://codeclimate.com/github/bkayser/cleansweep)
+[![Build Status](https://img.shields.io/travis/bkayser/cleansweep/master.svg?x=3)](https://travis-ci.org/bkayser/cleansweep)
+[![Code Climate](https://codeclimate.com/github/bkayser/cleansweep/badges/gpa.svg?x=3)](https://codeclimate.com/github/bkayser/cleansweep)
+[![Test Coverage](https://codeclimate.com/github/bkayser/cleansweep/badges/coverage.svg?x=3)](https://codeclimate.com/github/bkayser/cleansweep)
 
 ## Installation
 
@@ -230,7 +230,7 @@ in your target table.
 ### Limitations
 
 * Only works for mysql.  I have only used it against 5.5.
-* Should work with ActiveRecord 3.* - 4.*.  The tests only work on 4.*.
+* Tested with ActiveRecord 3.1.\* - 4.0.\*.
 * Using a non-unique index risks missing duplicate rows unless you use the `first_only` option.
 * Using the `first_only` option risks rescanning many rows if you have many more duplicates than your
   chunk size
