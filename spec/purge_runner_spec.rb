@@ -1,15 +1,17 @@
 require 'spec_helper'
 
-require 'active_support/testing/time_helpers'
+# Time mocking features are available in Rails 4 but not Rails 3 and the Timecop 
+# gem works with both.
+require 'timecop'
+
 describe CleanSweep::PurgeRunner do
 
   context 'PurgeRunner' do
-    include ActiveSupport::Testing::TimeHelpers
     before do
-      travel_to Time.parse("2014-12-02 13:47:43.000000 -0800")
+      Timecop.freeze Time.parse("2014-12-02 13:47:43.000000 -0800")
     end
     after do
-      travel_back
+      Timecop.return
     end
 
     context "using comments" do
@@ -66,20 +68,20 @@ describe CleanSweep::PurgeRunner do
         it 'prints out the queries in a dry run' do
           purger = CleanSweep::PurgeRunner.new model: Comment,
                                                index: 'comments_on_account_timestamp'  do | scope |
-            scope.where('timestamp < ?', 1.week.ago)
+            scope.where('timestamp < ?', 1.week.ago.to_date)
           end
           output = purger.print_queries
           expect(output).to eq <<EOF
 Initial Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43.000000')
+    WHERE (timestamp < '2014-11-25')
     ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Chunk Query:
     SELECT  `comments`.`id`,`comments`.`account`,`comments`.`timestamp`
     FROM `comments` FORCE INDEX(comments_on_account_timestamp)
-    WHERE (timestamp < '2014-11-25 21:47:43.000000') AND (`comments`.`account` > 0 OR (`comments`.`account` = 0 AND `comments`.`timestamp` > '2014-11-18 21:47:43.000000'))\n    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
+    WHERE (timestamp < '2014-11-25') AND (`comments`.`account` > 0 OR (`comments`.`account` = 0 AND `comments`.`timestamp` > '2014-11-18'))\n    ORDER BY `comments`.`account` ASC,`comments`.`timestamp` ASC
     LIMIT 500
 Delete Statement:
     DELETE
@@ -104,7 +106,7 @@ EOF
           end
           expect(Comment.count).to eq(5)
           # Only old comments deleted before stopping
-          expect(Comment.where('timestamp >= ?', 4.days.ago).count).to eq(5)
+          expect(Comment.where('timestamp >= ?', 4.days.ago.to_date).count).to eq(5)
         end
         it "descends the index" do
           purger = CleanSweep::PurgeRunner.new model: Comment,

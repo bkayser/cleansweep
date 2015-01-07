@@ -7,6 +7,7 @@ require 'factory_girl'
 require 'fileutils'
 require 'active_record'
 require 'mysql2'
+require 'timecop'
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.formatter = :progress
@@ -34,3 +35,4 @@ connection.query "CREATE DATABASE IF NOT EXISTS #{db_name}"
 database[:database] = db_name
 
 ActiveRecord::Base.establish_connection(database)
+

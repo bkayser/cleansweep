@@ -46,7 +46,7 @@ describe CleanSweep::TableSchema do
       it 'should produce an ascending chunk clause' do
         rows = account_and_timestamp_rows
         expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-            .to include("(`comments`.`account` > 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` > '2014-12-01 23:13:25.000000'))")
+            .to include("(`comments`.`account` > 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` > '2014-11-29'))")
       end
 
       it 'should produce all select columns' do
@@ -61,7 +61,7 @@ describe CleanSweep::TableSchema do
       it 'should produce an insert statement' do
         schema = CleanSweep::TableSchema.new Comment, index: 'comments_on_account_timestamp'
         rows = account_and_timestamp_rows
-        expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1001,5,'2014-12-02 01:13:25.000000'),(1002,2,'2014-12-02 00:13:25.000000'),(1005,5,'2014-12-01 23:13:25.000000')")
+        expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1001,5,'2014-12-01'),(1002,2,'2014-11-30'),(1005,5,'2014-11-29')")
       end
     end
 
@@ -72,7 +72,7 @@ describe CleanSweep::TableSchema do
       it 'should produce a descending where clause' do
         rows = account_and_timestamp_rows
         expect(schema.scope_to_next_chunk(schema.initial_scope, rows.last).to_sql)
-            .to include("(`comments`.`account` < 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` < '2014-12-01 23:13:25.000000'))")
+            .to include("(`comments`.`account` < 5 OR (`comments`.`account` = 5 AND `comments`.`timestamp` < '2014-11-29'))")
       end
 
 
@@ -125,7 +125,7 @@ describe CleanSweep::TableSchema do
       expect(schema.column_names).to eq([:seen, :id, :account, :timestamp])
       rows = account_and_timestamp_rows
       rows.map! { |row| row.unshift 1 } # Insert 'seen' value to beginning of row
-      expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`seen`,`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1,1001,5,'2014-12-02 01:13:25.000000'),(1,1002,2,'2014-12-02 00:13:25.000000'),(1,1005,5,'2014-12-01 23:13:25.000000')")
+      expect(schema.insert_statement(rows)).to eq("insert into `comments` (`comments`.`seen`,`comments`.`id`,`comments`.`account`,`comments`.`timestamp`) values (1,1001,5,'2014-12-01'),(1,1002,2,'2014-11-30'),(1,1005,5,'2014-11-29')")
 
     end
 
@@ -133,9 +133,9 @@ describe CleanSweep::TableSchema do
 
   def account_and_timestamp_rows
     rows = []
-    t = Time.parse '2014-12-01 17:13:25.000000'
+    t = Date.parse '2014-12-01'
     rows << [1001, 5, t]
-    rows << [1002, 2, t - 1.hour]
-    rows << [1005, 5, t - 2.hours]
+    rows << [1002, 2, t - 1]
+    rows << [1005, 5, t - 2]
   end
 end
