@@ -3,7 +3,7 @@ module CleanSweep::PurgeRunner::Logging
   def report(force=false)
     report_duration = Time.now - @report_interval_start
     if (force || report_duration >= @report_interval)
-      while (@report_interval_start < Time.now - @report_interval) do
+      while (@report_interval > 0 && @report_interval_start < Time.now - @report_interval) do
         @report_interval_start += @report_interval
       end
       print_report
@@ -49,7 +49,7 @@ module CleanSweep::PurgeRunner::Logging
     if (time.to_i > (24 * 60 * 60))
       format_string = "%d days, %H:%M"
     end
-    Time.at(time).strftime(format_string)
+    Time.at(time).utc.strftime(format_string)
   end
 
   def print_report

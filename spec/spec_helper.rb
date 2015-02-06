@@ -7,7 +7,11 @@ require 'factory_girl'
 require 'fileutils'
 require 'active_record'
 require 'mysql2'
+
+# Time mocking features are available in Rails 4 but not Rails 3 and the Timecop 
+# gem works with both.
 require 'timecop'
+
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
   config.formatter = :progress

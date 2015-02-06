@@ -123,8 +123,9 @@ class CleanSweep::PurgeRunner
     raise "An index is required in copy mode" if copy_mode? && @table_schema.traversing_key.nil?
     raise "first_only option not allowed in copy mode" if copy_mode? && @table_schema.first_only?
 
-    @report_interval_start = Time.now
-
+    @start                 = Time.now
+    @report_interval_start = @start
+    @total_deleted         = 0
     @query                 = @table_schema.initial_scope.limit(@limit)
 
     @query = yield(@query) if block_given?
@@ -148,7 +149,6 @@ class CleanSweep::PurgeRunner
       return 0
     end
 
-    @start = Time.now
     verb = copy_mode? ? "copying" : "purging"
 
     msg = "starting: #{verb} #{@table_schema.name} records in batches of #@limit"
@@ -156,7 +156,6 @@ class CleanSweep::PurgeRunner
 
 
     log :info,  "sleeping #{@sleep} seconds between purging" if @sleep && !copy_mode?
-    @total_deleted = 0
 
     # Iterate through the rows in limit chunks
     log :debug, "find rows: #{@query.to_sql}" if @logger.level == Logger::DEBUG

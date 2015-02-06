@@ -1,5 +1,9 @@
 See the [documentation](http://bkayser.github.io/cleansweep) for details
 
+### Version 1.0.5
+
+* Fix timestamp in interval reports which was off by timezone offset in hours.
+
 ### Version 1.0.4
 
 * Print dry run output using the logger

@@ -1,8 +1,5 @@
 require 'spec_helper'
-
-# Time mocking features are available in Rails 4 but not Rails 3 and the Timecop 
-# gem works with both.
-require 'timecop'
+require 'logger'
 
 describe CleanSweep::PurgeRunner do
 
@@ -165,6 +162,40 @@ EOF
         expect(Book.count).to be 0
       end
 
+      context "logging" do
+        before do
+          @buffer = StringIO.new
+          logger = Logger.new(@buffer)
+          logger.formatter = SimpleFormatter.new
+          @purger = CleanSweep::PurgeRunner.new model: Book,
+                                               chunk_size: 4,
+                                               logger: logger,
+                                               report: 5.minutes
+
+        end
+
+        it 'should log correct timestamps' do
+          Timecop.freeze 90.seconds.from_now
+          @purger.report(true)
+          expect(@buffer.string).to eq <<EOF
+ ** report:
+ **   deleted:            0 books records
+ **   elapsed:     00:01:30
+ **   rate:             < 1 records/second
+EOF
+        end
+
+        it 'should log at correct intervals' do
+          Timecop.freeze 4.minutes.from_now
+          @purger.report
+          expect(@buffer.string).to eq ""
+
+          Timecop.freeze 6.minutes.from_now
+          @purger.report
+          expect(@buffer.string).to_not be_empty
+        end
+      end
+
       it 'copies books' do
         BookTemp.create_table
         purger = CleanSweep::PurgeRunner.new model: Book,
@@ -222,6 +253,12 @@ describe CleanSweep::PurgeRunner::MysqlStatus do
 
     it "fetches slave status" do
       mysql_status.get_history_length
+    end
+  end
+
+  class SimpleFormatter < ::Logger::Formatter
+    def call(severity, timestamp, progname, msg)
+      "#{msg}\n"
     end
   end
 
