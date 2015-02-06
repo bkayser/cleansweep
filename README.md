@@ -140,7 +140,7 @@ week are copied.
                                            index: 'comments_on_account_timestamp',
                                            dest_model: ExpiredComment,
                                            copy_only: true,
-                                           copy_columns: %w[liked] do do | model |
+                                           copy_columns: %w[liked] do | model |
         model.where('last_used_at < ?', 1.week.ago)
       end
 ```
