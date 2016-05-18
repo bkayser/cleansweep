@@ -76,6 +76,16 @@ class CleanSweep::PurgeRunner::MysqlStatus
         show engine innodb status
     EOF
     status_string = rows.first[2]
+
+    # This output of 'show engine innnodb status' contains a bunch of
+    # information, including info about the most recently detected deadlock,
+    # which has the involved queries, which may contain invalid UTF-8 byte
+    # sequences.
+    #
+    # Forcing the encoding to ASCII-8BIT here prevents the regex match below
+    # from falling over when this happens.
+    status_string.force_encoding('ASCII-8BIT')
+
     return /History list length ([0-9]+)/.match(status_string)[1].to_i
   end
 
