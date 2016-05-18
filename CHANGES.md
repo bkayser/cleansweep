@@ -1,5 +1,9 @@
 See the [documentation](http://bkayser.github.io/cleansweep) for details
 
+### Version 1.0.6
+
+* Fix problem with non UTF8 characters returned in the innodb status (Thanks benweint).
+
 ### Version 1.0.5
 
 * Fix timestamp in interval reports which was off by timezone offset in hours.
