@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^spec/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'activerecord', '>= 3.0'
+  spec.add_runtime_dependency 'activerecord', '>= 3.0', '< 5.0.0'
   spec.add_runtime_dependency 'newrelic_rpm'
   spec.add_runtime_dependency 'mysql2', '~> 0.3'
 
