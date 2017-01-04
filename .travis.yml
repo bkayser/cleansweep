@@ -7,3 +7,5 @@ gemfile:
 addons:
   code_climate:
     repo_token: 7ec6fd701b7d2b206cdd233c2202b6e11c8ba6af01f8a93f5e24595008ac20a0
+after_success:
+  - bundle exec codeclimate-test-reporter
