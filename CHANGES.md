@@ -1,4 +1,9 @@
 See the [documentation](http://bkayser.github.io/cleansweep) for details
+### Version 1.1.0
+
+* Support automatic DB reconnection during a purge run.
+  The max number of reconnections can be controlled with the max_reconnects
+  option to PurgeRunner.
 
 ### Version 1.0.6
 

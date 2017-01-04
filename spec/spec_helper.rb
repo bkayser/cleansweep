@@ -1,7 +1,8 @@
 ENV['RACK_ENV'] = 'test'
 
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+require 'simplecov'
+SimpleCov.start
+
 require 'clean_sweep'
 require 'factory_girl'
 require 'fileutils'

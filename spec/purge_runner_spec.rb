@@ -7,6 +7,7 @@ describe CleanSweep::PurgeRunner do
     before do
       Timecop.freeze Time.parse("2014-12-02 13:47:43.000000 -0800")
     end
+
     after do
       Timecop.return
     end
@@ -135,6 +136,82 @@ EOF
         Book.delete_all
       end
 
+      it 'reconnects after a lost connection' do
+        purger = CleanSweep::PurgeRunner.new model: Book,
+                                             chunk_size: 10
+
+        original_update = Book.connection.method(:update)
+        update_number = 0
+
+        allow(Book.connection).to receive(:update) do |*args|
+          update_number += 1
+
+          if update_number == 2
+            raise ActiveRecord::StatementInvalid.new("Lost connection to MySQL server during query: blah blah")
+          else
+            original_update.call(*args)
+          end
+        end
+
+        expect(purger).to receive(:sleep).once
+        expect(Book.connection).to receive(:reconnect!).once
+
+        purger.execute_in_batches
+
+        expect(Book.count).to eq(0)
+      end
+
+      it 'reconnects after a lost connection during select' do
+        purger = CleanSweep::PurgeRunner.new model: Book,
+                                             chunk_size: 10
+
+        original_select_rows = Book.connection.method(:select_rows)
+        iteration = 0
+
+        allow(Book.connection).to receive(:select_rows) do |*args|
+          iteration += 1
+
+          if iteration == 2
+            raise ActiveRecord::StatementInvalid.new("Lost connection to MySQL server during query: blah blah")
+          else
+            original_select_rows.call(*args)
+          end
+        end
+
+        expect(purger).to receive(:sleep).once
+        expect(Book.connection).to receive(:reconnect!).once
+
+        purger.execute_in_batches
+
+        expect(Book.count).to eq(0)
+      end
+
+      it 'stops trying to reconnect after max_reconnects' do
+        purger = CleanSweep::PurgeRunner.new model: Book,
+                                             chunk_size: 10,
+                                             max_reconnects: 4
+
+        original_update = Book.connection.method(:update)
+        update_number = 0
+
+        allow(Book.connection).to receive(:update) do |*args|
+          update_number += 1
+          if update_number > 1
+            raise ActiveRecord::StatementInvalid.new("Lost connection to MySQL server during query: blah blah")
+          else
+            original_update.call(*args)
+          end
+        end
+
+        expect(purger).to receive(:sleep).exactly(4).times
+        expect(Book.connection).to receive(:reconnect!).exactly(4).times
+
+        expect { purger.execute_in_batches }.to raise_error(ActiveRecord::StatementInvalid)
+
+        # we only got through the first batch of 10, and then gave up
+        expect(Book.count).to eq(40)
+      end
+
       it 'waits for history' do
         purger = CleanSweep::PurgeRunner.new model: Book,
                                              max_history: 100,
@@ -209,10 +286,11 @@ EOF
         count = purger.execute_in_batches
         expect(count).to be(@total_book_size)
         expect(BookTemp.count).to eq(@total_book_size)
-        last_book = BookTemp.last
-        expect(last_book.book_id).to be 200
-        expect(last_book.bin).to be 2000
-        expect(last_book.published_by).to eq 'Random House'
+        last_book = Book.last
+        last_book_copy = BookTemp.last
+        expect(last_book_copy.book_id).to eq(last_book.id)
+        expect(last_book_copy.bin).to eq(last_book.bin)
+        expect(last_book_copy.published_by).to eq(last_book.publisher)
       end
 
     end
@@ -234,12 +312,16 @@ describe CleanSweep::PurgeRunner::MysqlStatus do
     it "fetches innodb status" do
       mysql_status.get_replication_lag
     end
+
     it "checks history and pauses" do
       allow(mysql_status).to receive(:get_history_length).and_return(101, 95, 89)
+      allow(mysql_status).to receive(:get_replication_lag).and_return(50)
       expect(mysql_status).to receive(:pause).twice
       mysql_status.check!
     end
+
     it "checks replication and pauses" do
+      allow(mysql_status).to receive(:get_history_length).and_return(50)
       allow(mysql_status).to receive(:get_replication_lag).and_return(101, 95, 89)
       expect(mysql_status).to receive(:pause).twice
       mysql_status.check!
