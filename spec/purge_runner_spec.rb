@@ -234,12 +234,16 @@ describe CleanSweep::PurgeRunner::MysqlStatus do
     it "fetches innodb status" do
       mysql_status.get_replication_lag
     end
+
     it "checks history and pauses" do
       allow(mysql_status).to receive(:get_history_length).and_return(101, 95, 89)
+      allow(mysql_status).to receive(:get_replication_lag).and_return(50)
       expect(mysql_status).to receive(:pause).twice
       mysql_status.check!
     end
+
     it "checks replication and pauses" do
+      allow(mysql_status).to receive(:get_history_length).and_return(50)
       allow(mysql_status).to receive(:get_replication_lag).and_return(101, 95, 89)
       expect(mysql_status).to receive(:pause).twice
       mysql_status.check!
