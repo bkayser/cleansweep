@@ -74,6 +74,10 @@ require 'stringio'
 # [:max_repl_lag]
 #    The maximum length of the replication lag.  Checked every 5 minutes and if exceeded the purge
 #    pauses until the replication lag is below 90% of this value.
+# [:max_reconnects]
+#    The maximum number of times to automatically attempt to reconnect to the database
+#    in the event of a dropped connection during a query. Set this to zero if you want
+#    to opt-out of the automatic reconnect behavior. Default: 3.
 
 class CleanSweep::PurgeRunner
 
