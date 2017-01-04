@@ -99,6 +99,8 @@ class CleanSweep::PurgeRunner
 
     @max_history      = options[:max_history]
     @max_repl_lag     = options[:max_repl_lag]
+    @max_reconnects   = options[:max_reconnects] || 3
+    @reconnects_remaining = @max_reconnects
 
     @copy_mode        = @target_model && options[:copy_only]
 
@@ -136,6 +138,27 @@ class CleanSweep::PurgeRunner
     @copy_mode
   end
 
+  def with_reconnect_handling
+    begin
+      yield
+    rescue ActiveRecord::StatementInvalid => e
+      if e.message =~ /Lost connection to MySQL server during query/
+        if @reconnects_remaining > 0
+          @reconnects_remaining -= 1
+          wait_before_reconnect = rand * 10.0
+          log :warn, "Lost connection to DB during query, reconnecting and trying again in #{wait_before_reconnect} seconds. #{@reconnects_remaining} re-connection attempts remaining after this. Original error: #{e}"
+          sleep(wait_before_reconnect)
+          @model.connection.reconnect!
+        else
+          log :error, "Lost connection to MySQL during query, and have already reconnected #{@max_reconnects} times. Giving up. Original error: #{e}"
+          raise
+        end
+      else
+        raise
+      end
+    end
+  end
+
   # Execute the purge in chunks according to the parameters given on instance creation.
   # Will raise <tt>CleanSweep::PurgeStopped</tt> if a <tt>stop_after</tt> option was provided and
   # that limit is hit.
@@ -165,6 +188,7 @@ class CleanSweep::PurgeRunner
     rows = NewRelic::Agent.with_database_metric_name(@model.name, 'SELECT') do
       @model.connection.select_rows @query.to_sql
     end
+
     while rows.any? && (!@stop_after || @total_deleted < @stop_after) do
 #      index_entrypoint_args = Hash[*@source_keys.zip(rows.last).flatten]
       log :debug, "#{verb} #{rows.size} records between #{rows.first.inspect} and #{rows.last.inspect}" if @logger.level == Logger::DEBUG
@@ -180,24 +204,30 @@ class CleanSweep::PurgeRunner
         statement = @table_schema.delete_statement(rows)
       end
       log :debug, statement if @logger.level == Logger::DEBUG
-      chunk_deleted = NewRelic::Agent.with_database_metric_name((@target_model||@model), metric_op_name) do
-        (@target_model||@model).connection.update statement
+
+      with_reconnect_handling do
+        chunk_deleted = NewRelic::Agent.with_database_metric_name((@target_model||@model), metric_op_name) do
+          (@target_model||@model).connection.update statement
+        end
+
+        @total_deleted += chunk_deleted
+        raise CleanSweep::PurgeStopped.new("stopped after #{verb} #{@total_deleted} #{@model} records", @total_deleted) if stopped
+        q = @table_schema.scope_to_next_chunk(@query, last_row).to_sql
+        log :debug, "find rows: #{q}" if @logger.level == Logger::DEBUG
+
+        sleep @sleep if @sleep && !copy_mode?
+        @mysql_status.check! if @mysql_status
+
+        rows = NewRelic::Agent.with_database_metric_name(@model, 'SELECT') do
+          @model.connection.select_rows(q)
+        end
       end
 
-      @total_deleted += chunk_deleted
-      raise CleanSweep::PurgeStopped.new("stopped after #{verb} #{@total_deleted} #{@model} records", @total_deleted) if stopped
-      q = @table_schema.scope_to_next_chunk(@query, last_row).to_sql
-      log :debug, "find rows: #{q}" if @logger.level == Logger::DEBUG
-
-      sleep @sleep if @sleep && !copy_mode?
-      @mysql_status.check! if @mysql_status
-
-      rows = NewRelic::Agent.with_database_metric_name(@model, 'SELECT') do
-        @model.connection.select_rows(q)
-      end
       report
     end
+
     report(true)
+
     if copy_mode?
       log :info,  "completed after #{verb} #{@total_deleted} #{@table_schema.name} records to #{@target_model.table_name}"
     else
