@@ -140,10 +140,9 @@ EOF
         purger = CleanSweep::PurgeRunner.new model: Book,
                                              chunk_size: 10
 
-        original_update = Book.connection.method(:update)
         update_number = 0
 
-        allow(Book.connection).to receive(:update) do |*args|
+        allow(Book.connection).to receive(:update).and_wrap_original do |original_update, *args|
           update_number += 1
 
           if update_number == 2
@@ -165,10 +164,9 @@ EOF
         purger = CleanSweep::PurgeRunner.new model: Book,
                                              chunk_size: 10
 
-        original_select_rows = Book.connection.method(:select_rows)
         iteration = 0
 
-        allow(Book.connection).to receive(:select_rows) do |*args|
+        allow(Book.connection).to receive(:select_rows).and_wrap_original do |original_select_rows, *args|
           iteration += 1
 
           if iteration == 2
